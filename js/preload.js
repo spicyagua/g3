@@ -13,7 +13,7 @@ EG3.Preload.prototype = {
     //the spinner just flashes even on my phone)
     //this.preloadSprite = this.add.sprite(this.game.world.width/2,this.game.world.height/2, 'preloadeImage');
 
-    this.game.load.image('bg', 'assets/bg.png');
+    this.game.load.image('bg', 'assets/bg2.png');
     this.game.load.image('gameLogo', 'assets/someGame.png');
     this.game.load.image('startButton', 'assets/startButton.png');
     //Load any audio here

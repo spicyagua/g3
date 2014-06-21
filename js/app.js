@@ -5,7 +5,7 @@ EG3.relHeight = 600;
 
 EG3.main = function() {
       "use strict";
-      var game = new Phaser.Game(EG3.relWidth, EG3.relWidth, Phaser.AUTO, 'G3');
+      var game = new Phaser.Game(EG3.relWidth, EG3.relHeight, Phaser.AUTO, 'G3');
 
 
 

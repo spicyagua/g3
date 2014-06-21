@@ -10,7 +10,7 @@ EG3.Options.prototype = {
   preload: function() {
     console.log("Options.preload");
     this.gameLogo = this.game.add.sprite(this.game.width/2-120, 100, 'gameLogo');
-    this.startButton = this.game.add.button(this.game.width/2, 400, 'startButton', this.startClicked, this);
+    this.startButton = this.game.add.button(this.game.width/2, 300, 'startButton', this.startClicked, this);
     this.startButton.anchor.setTo(0.5,0.5);
   },
   create: function() {
