@@ -16,6 +16,7 @@ EG3.Preload.prototype = {
     this.game.load.image('bg', 'assets/bg2.png');
     this.game.load.image('gameLogo', 'assets/someGame.png');
     this.game.load.image('startButton', 'assets/startButton.png');
+    this.game.load.image('greenBall', 'assets/greenBall.png');    
     //Load any audio here
 
     this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
