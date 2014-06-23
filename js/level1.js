@@ -28,16 +28,26 @@ EG3.Level1.prototype = {
     
     this.playerEye = this.game.add.sprite(0, 0, 'playerEye');
     this.playerEye.anchor.setTo(0.5, 0.5);   
-    this.game.physics.enable(this.playerEye, Phaser.Physics.ARCADE);    
+    this.game.physics.enable(this.playerEye, Phaser.Physics.ARCADE);  
+    
+    //TEMP Playing with hitting walls
+    this.playerBody.body.collideWorldBounds = true;      
+    this.playerBody.body.velocity.setTo(20 + Math.random() * 40, 20 + Math.random() * 40);
+    this.playerBody.body.bounce.x = 1;
+    this.playerBody.body.bounce.y = 1;    
     
     this.playerEye.x = this.playerBody.x;      
-    this.playerEye.y = this.playerBody.y;    
+    this.playerEye.y = this.playerBody.y;  
+    this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);      
     
   },
   update: function() {
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
     this.game.physics.arcade.collide(this.balls);
+    this.game.physics.arcade.collide(this.balls, this.playerBody);
+    this.playerEye.x = this.playerBody.x;      
+    this.playerEye.y = this.playerBody.y;    
     
     this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);    
   },

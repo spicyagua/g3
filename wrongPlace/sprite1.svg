@@ -14,7 +14,7 @@
    id="svg3272"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   inkscape:export-filename="/var/www/g3/wrongPlace/playerEye.png"
+   inkscape:export-filename="/var/www/g3/assets/playerEye.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    sodipodi:docname="sprite1.svg">
@@ -31,7 +31,7 @@
      inkscape:cx="15.891982"
      inkscape:cy="41.99301"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      showgrid="false"
      inkscape:showpageshadow="false"
      inkscape:window-width="1528"
@@ -56,7 +56,7 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1012.3622)"
-     style="display:inline">
+     style="display:none">
     <path
        style="fill:#f31b76;fill-opacity:1;stroke:#faa9cb;stroke-width:0.97799248;stroke-opacity:1"
        d="m 24.964466,1012.8443 c -12.787131,0 -23.2833922,17.1543 -24.51100367,39.022 l 49.02200767,0 c -1.227453,-21.8677 -11.723755,-39.022 -24.511004,-39.022 z"
@@ -78,14 +78,14 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="eye"
-     style="display:none">
+     style="display:inline">
     <g
        style="display:inline"
        id="g4064"
-       transform="matrix(0.99994574,0.01041734,-0.01041734,0.99994574,10.810284,-1011.7403)">
+       transform="matrix(-0.99994574,-0.01041734,0.01041734,-0.99994574,39.444804,1043.5054)">
       <path
          transform="matrix(1,0,0,1.0695725,-1.6211928,1009.3499)"
-         d="m 34.345186,16.892761 a 7.7024131,6.4397225 0 1 1 -15.404826,0 7.7024131,6.4397225 0 1 1 15.404826,0 z"
+         d="m 34.345186,16.892761 c 0,3.556561 -3.448488,6.439723 -7.702413,6.439723 -4.253926,0 -7.702413,-2.883162 -7.702413,-6.439723 0,-3.55656 3.448487,-6.439722 7.702413,-6.439722 4.253925,0 7.702413,2.883162 7.702413,6.439722 z"
          sodipodi:ry="6.4397225"
          sodipodi:rx="7.7024131"
          sodipodi:cy="16.892761"
@@ -95,7 +95,7 @@
          sodipodi:type="arc" />
       <path
          transform="translate(0.25253814,1011.2258)"
-         d="m 29.294424,11.968266 a 4.7350903,1.767767 0 1 1 -9.47018,0 4.7350903,1.767767 0 1 1 9.47018,0 z"
+         d="m 29.294424,11.968266 c 0,0.97631 -2.119972,1.767766 -4.73509,1.767766 -2.615118,0 -4.73509,-0.791456 -4.73509,-1.767766 0,-0.976311 2.119972,-1.767767 4.73509,-1.767767 2.615118,0 4.73509,0.791456 4.73509,1.767767 z"
          sodipodi:ry="1.767767"
          sodipodi:rx="4.7350903"
          sodipodi:cy="11.968266"
