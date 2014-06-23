@@ -7,7 +7,13 @@ EG3.Level1 = function() {
   this.playerEye;
   this.tap;
   this.moveTween;
+  this.numBalls = 6;
+  this.clockDisplay;
+  this.startTime;
 }
+
+//TODO refactor so there is a base Level prototype,
+
 
 EG3.Level1.prototype = {
 
@@ -25,13 +31,28 @@ EG3.Level1.prototype = {
 
     this.game.add.sprite(0,0,"bg");
 
+
+    this.clockDisplay = this.game.add.text(
+      250,
+      20,
+      "00.0000",
+      {
+        "font": "36px monospace",
+        "color": "white",
+        "fill": "#ff0044"
+      }
+      );
+
+
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.createBalls();
 
     //For reasons I don't understand if I start them out at the same point the second
     //image is a green box.  I'd seen this before.  It seems to work if I move them back
-    this.playerBody = this.game.add.sprite(100, 100, 'playerBody');
+    this.playerBody = this.game.add.sprite(
+      (this.game.world.width/2) - 25,
+      (this.game.world.height/2) - 20, 'playerBody');
     this.playerBody.anchor.setTo(0.5, 0.5);
     this.game.physics.enable(this.playerBody, Phaser.Physics.ARCADE);
 
@@ -57,6 +78,21 @@ EG3.Level1.prototype = {
   },
 
   update: function() {
+    if(!this.startTime) {
+      this.startTime = this.game.time.now;
+    }
+    var diff = this.game.time.now - this.startTime;
+    if(diff == 0) {
+      diff = 1;
+    }
+    var seconds = Math.floor(diff/1000) % 60;
+    var millis = diff;
+
+    if(millis < 10) {millis = '0' + millis;}
+    if(seconds < 10) {seconds = '0' + seconds;}
+//    console.log("Time: " + seconds + "." + millis);
+    this.clockDisplay.text = seconds + "." + millis;
+
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
@@ -112,16 +148,41 @@ EG3.Level1.prototype = {
     this.balls = this.game.add.group();
     this.balls.enableBody = true;
 
-    for (var i = 0; i < 10; i++)
-    {
-        var s = this.balls.create(this.game.world.randomX, this.game.world.randomY, 'greenBall');
-        s.name = 'greenBall' + i;
-        this.game.physics.enable(s, Phaser.Physics.ARCADE);
-        s.body.collideWorldBounds = true;
-        s.body.bounce.setTo(0.8, 0.8);
-        s.body.velocity.setTo(10 + Math.random() * 40, 10 + Math.random() * 40);
-        s.body.bounce.x = 1;
-        s.body.bounce.y = 1;
+    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
+    console.log("Creating balls.  ySpace: " + ySpace);
+
+    for (var i = 0; i < this.numBalls; i++) {
+      var leftSide = true;
+      if(i*2 >= this.numBalls) {
+        leftSide = false;
+      }
+      var startx = (leftSide?30:(this.game.world.width - 30));
+
+      var a1 = i;
+      var a2 = (this.numBalls);
+      var a3 = ((this.numBalls)/2);
+      var a4 = (i - ((this.numBalls)/2));
+      var a5 = a4*ySpace;
+
+      var starty = (leftSide?
+        (i*ySpace):
+        ((i - ((this.numBalls)/2))*ySpace)
+        )+30;
+      console.log("(" + i + ") Create ball at: " + startx + ", " + starty);
+      var s = this.balls.create(
+        //this.game.world.randomX,
+        //this.game.world.randomY,
+        startx,
+        starty,
+        'greenBall');
+
+      s.name = 'greenBall' + i;
+      this.game.physics.enable(s, Phaser.Physics.ARCADE);
+      s.body.collideWorldBounds = true;
+      s.body.bounce.setTo(0.8, 0.8);
+      s.body.velocity.setTo(10 + Math.random() * 40, 10 + Math.random() * 40);
+      s.body.bounce.x = 1;
+      s.body.bounce.y = 1;
 //        s.body.minBounceVelocity(0);
 
     }
