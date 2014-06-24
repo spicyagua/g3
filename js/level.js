@@ -13,6 +13,7 @@ EG3.Level = function() {
   this.clockDisplay;
   this.startTime;
   this.timeHack = 0;
+  this.playerSpeedFactor = 5;//bigger means slower
 }
 
 //TODO refactor so there is a base Level prototype,
@@ -23,32 +24,17 @@ EG3.Level.prototype = {
   init: function(params) {
     console.log("Init called.  This is how I can pass state between ... states");
   },
-
-  /**
-   * I was having trouble reusing the tweens so I just junk them now and re-create each time.
-   */
-  createMoveTween: function() {
-    return this.game.add.tween(this.playerBody);
-  },
   preload: function() {
     console.log("Level1.preload");
   },
   create: function() {
     console.log("Level1.create");
 
+    //Add background
     this.game.add.sprite(0,0,"bg");
 
 
-    this.clockDisplay = this.game.add.text(
-      250,
-      20,
-      "00.0000",
-      {
-        "font": "36px monospace",
-        "color": "white",
-        "fill": "#ff0044"
-      }
-      );
+
 
 
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -80,9 +66,25 @@ EG3.Level.prototype = {
     this.playerEye.y = this.playerBody.y;
     this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);
 
+    //Tap handler to move the player
     this.game.input.onTap.add(this.tapHandler, this);
 
-    this.moveTween = this.createMoveTween();
+    //This is just so I don't have to have a bunch of
+    //null checks later.  The tween isn't used for anything
+    this.moveTween = this.game.add.tween(this.playerBody);
+
+    //The time display.  This is done last so it is highest in the "z" order.
+    //I could also learn about groups, but I'm being lazy right now.
+    this.clockDisplay = this.game.add.text(
+      250,
+      20,
+      "00.00",
+      {
+        "font": "36px monospace",
+        "color": "white",
+        "fill": "#ff0044"
+      }
+      );
 
   },
 
@@ -119,35 +121,34 @@ EG3.Level.prototype = {
     this.playerEye.x = this.playerBody.x;
     this.playerEye.y = this.playerBody.y;
 
-    this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);
+    if(!this.playerDead) {
+      this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);
+    }
 
+    //I think I was chasing some other bug and moved the logic for tap
+    //handling here.
+    //TODO Move this bask to where it belongs
     if(this.tap) {
-      this.moveTween = this.createMoveTween();
+      //Create the tween to move the player
+      this.moveTween = this.game.add.tween(this.playerBody);
 
-      this.moveTween.to({
-        x: this.tap.x,
-        y: this.tap.y
-      },
-//      this.game.physics.arcade.distanceToPointer(this.playerBody, this.game.input.activePointer),
-        500,
+      //so the player moves at a constant *speed*, the tween should have
+      //a duration proportional to the distance it will travel
+      var duration = this.playerSpeedFactor *
+        Math.floor(this.game.physics.arcade.distanceToPointer(this.playerBody, this.game.input.activePointer));
+
+      this.moveTween.to(
+        {
+          x: this.tap.x,
+          y: this.tap.y
+        },
+        duration,
         Phaser.Easing.Quadratic.In
       );
-      var that = this;
-      this.moveTween.onLoop.add(function() {
-        console.log("(tween callback) In tween loop");
-      });
-      this.moveTween.onStart.add(function() {
-        console.log("(tween callback) Starting tween loop");
-      });
-      this.moveTween.onComplete.add(function() {
-        console.log("(tween callback) Done tween loop");
-      });
       console.log("Calling start on tween");
       this.moveTween.start();
       delete this.tap;
     }
-
-
   },
   playerBallCollisionNotification: function(playerBody, ball) {
     //I have yet to figure out what this does and why it is called
@@ -225,7 +226,6 @@ EG3.Level.prototype = {
     }
   },
   tapHandler: function() {
-
     console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
     if(this.moveTween.isRunning) {
       console.log("Tween running.  Stop it");
@@ -234,10 +234,9 @@ EG3.Level.prototype = {
     else {
       console.log("Tween not running.");
     }
-
     this.tap = {
-      x:this.game.input.activePointer.x,
+      x: this.game.input.activePointer.x,
       y: this.game.input.activePointer.y
-  };
+    };
   }
 };
