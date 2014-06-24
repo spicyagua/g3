@@ -20,10 +20,12 @@ EG3.Preload.prototype = {
     this.game.load.image('greenBall', 'assets/greenBall.png');
     this.game.load.image('playerBody', 'assets/playerBody.png');
     this.game.load.image('playerEye', 'assets/playerEye.png');
+    this.game.load.image('bodyBig', 'assets/bodyBig.png');
+    this.game.load.image('blankEyeBig', 'assets/blankEyeBig.png');
+    this.game.load.image('mouthBig', 'assets/mouthBig.png');
+    this.game.load.image('pupilBig', 'assets/pupilBig.png');
     this.game.load.image('deadEye', 'assets/deadEye.png');
-    this.game.load.image('blankEye', 'assets/blankEye.png');
-    this.game.load.image('mouth', 'assets/mouth.png');
-    this.game.load.image('pupil', 'assets/pupil.png');
+
     //Load any audio here
 
     this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
