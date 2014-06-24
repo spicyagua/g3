@@ -10,12 +10,17 @@ EG3.Level1 = function() {
   this.numBalls = 6;
   this.clockDisplay;
   this.startTime;
+  this.timeHack = 0;
 }
 
 //TODO refactor so there is a base Level prototype,
 
 
 EG3.Level1.prototype = {
+
+  init: function(params) {
+    console.log("Init called.  This is how I can pass state between ... states");
+  },
 
   /**
    * I was having trouble reusing the tweens so I just junk them now and re-create each time.
@@ -60,6 +65,8 @@ EG3.Level1.prototype = {
     this.playerEye.anchor.setTo(0.5, 0.375);
     this.game.physics.enable(this.playerEye, Phaser.Physics.ARCADE);
 
+
+
     //TEMP Playing with hitting walls
     //4 lines below were just fun to have it bounce off stuff
  //   this.playerBody.body.collideWorldBounds = true;
@@ -81,17 +88,22 @@ EG3.Level1.prototype = {
     if(!this.startTime) {
       this.startTime = this.game.time.now;
     }
-    var diff = this.game.time.now - this.startTime;
-    if(diff == 0) {
-      diff = 1;
-    }
-    var seconds = Math.floor(diff/1000) % 60;
-    var millis = diff;
+    if(this.timeHack++ > 3 && !this.playerDead) {
+      this.timeHack = 0;
+      var diff = this.game.time.now - this.startTime;
+      if(diff == 0) {
+        diff = 1;
+      }
+      var seconds = Math.floor(diff/1000);
+      var decis = diff % 100;
+      //TODO Fix this.  It isn't correct, but goes by too fast so it creates
+      //the illusion of a "real" time
 
-    if(millis < 10) {millis = '0' + millis;}
-    if(seconds < 10) {seconds = '0' + seconds;}
-//    console.log("Time: " + seconds + "." + millis);
-    this.clockDisplay.text = seconds + "." + millis;
+      if(decis < 10) {decis = '0' + decis;}
+      if(seconds < 10) {seconds = '0' + seconds;}
+  //    console.log("Time: " + seconds + "." + millis);
+      this.clockDisplay.text = seconds + "." + decis;
+    }
 
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
@@ -141,8 +153,31 @@ EG3.Level1.prototype = {
   },
   playerBallCollisionProcess: function(playerBody, ball) {
     console.log("Player/ball collision (process callback)");
+    if(this.playerDead) {
+      return true;
+    }
+    this.playerDead = true;
     this.moveTween.stop();
-    return false;
+    this.playerEye.destroy();
+    this.playerEye = this.game.add.sprite(0, 0, 'deadEye');
+
+    this.playerEye.anchor.setTo(0.5, 0.375);
+    this.playerEye.x = this.playerBody.x;
+    this.playerEye.y = this.playerBody.y;
+    this.game.physics.enable(this.playerEye, Phaser.Physics.ARCADE);
+    this.playerBody.body.gravity.y = 100;
+    this.game.input.onTap.remove(this.tapHandler, this);
+
+    //Trying to get callback when sprite falls off the world
+    this.playerBody.checkWorldBounds = true;
+    this.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
+//    this.game.debug.body(this.playerEye);
+
+    return true;
+  },
+  spriteLeftWorld: function() {
+    console.log("Sprite left world");
+//    this.game.state.start('level1', true, true);
   },
   createBalls: function() {
     this.balls = this.game.add.group();
