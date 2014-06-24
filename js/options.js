@@ -1,7 +1,6 @@
 var EG3 = EG3 || {};
 
 EG3.Options = function() {
-//  this.loadComplete = false;
   this.startButton;
   this.gameLogo;
 }
@@ -35,8 +34,13 @@ EG3.Options.prototype = {
     this.mouth.scale.x = 0.25;
     this.mouth.scale.y = 0.25;
 
-    this.game.time.events.add(Phaser.Timer.SECOND * 1, this.addInPlayer, this);
+//    this.game.time.events.add(Phaser.Timer.SECOND * 1, this.addInPlayer, this);
+    var t1 = this.game.add.tween(this.playerBody.scale).to({x:1, y:1}, 1000, Phaser.Easing.Quadratic.In, true);
+    var t2 = this.game.add.tween(this.blankEye.scale).to({x:1, y:1}, 1000, Phaser.Easing.Quadratic.In, true);
+    var t3 = this.game.add.tween(this.pupil.scale).to({x:1, y:1}, 1000, Phaser.Easing.Quadratic.In, true);
+    var t4 = this.game.add.tween(this.mouth.scale).to({x:1, y:1}, 1000, Phaser.Easing.Quadratic.In, true);
 
+    this.game.time.events.add(Phaser.Timer.SECOND * 2, this.moveEyes, this);
 
   },
   addInPlayer: function() {
