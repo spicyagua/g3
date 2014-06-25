@@ -14,7 +14,10 @@
    id="svg3830"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="New document 4">
+   sodipodi:docname="button.svg"
+   inkscape:export-filename="/var/www/g3/assets/playButton.png"
+   inkscape:export-xdpi="22.539915"
+   inkscape:export-ydpi="22.539915">
   <defs
      id="defs3832" />
   <sodipodi:namedview
@@ -52,7 +55,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#f5f5f5;fill-opacity:1;stroke:none;stroke-width:1.08841395000000007;stroke-opacity:1"
+       style="fill:#f5f5f5;fill-opacity:1;stroke:none"
        id="rect3838-4"
        width="598.91162"
        height="298.91159"
@@ -64,5 +67,17 @@
        d="m -819.46875,-125.38739 0,23.59375 c 0,70.06028 56.40847,126.46875 126.46875,126.46875 l 346,0 c 70.06028,0 126.46875,-56.40847 126.46875,-126.46875 l 0,-23.59375 -598.9375,0 z"
        id="rect3838"
        inkscape:connector-curvature="0" />
-  </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4388"
+       style="font-size:144px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:4.48000002px;word-spacing:2.3900001px;fill:#000000;fill-opacity:1;stroke:none;font-family:Andika;-inkscape-font-specification:Andika"
+       transform="translate(76,-14)"><flowRegion
+         id="flowRegion4390"><rect
+           id="rect4392"
+           width="517.14288"
+           height="220"
+           x="-745.71429"
+           y="-216.20924"
+           style="font-size:144px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Andika;-inkscape-font-specification:Andika" /></flowRegion><flowPara
+         id="flowPara4394">Play</flowPara></flowRoot>  </g>
 </svg>

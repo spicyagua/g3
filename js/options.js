@@ -50,7 +50,7 @@ EG3.Options.prototype = {
     var myTween = this.game.add.tween(this.pupil);
     myTween.to({x: center-14}).to({x:center+14}).to({x:center});
     myTween.start();
-    this.game.time.events.add(Phaser.Timer.SECOND * 3, this.moveEyes, this);
+//    this.game.time.events.add(Phaser.Timer.SECOND * 3, this.moveEyes, this);
   },
   create: function() {
     console.log("Options.create");

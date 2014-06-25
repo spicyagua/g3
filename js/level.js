@@ -6,7 +6,9 @@ EG3.Level = function() {
   //Data members here
   this.numBalls = 6;
   this.timeHack = 0;
-  this.playerSpeedFactor = 7;//bigger means slower
+  this.playerSpeedFactor = 5;//bigger means slower
+  this.ballSpeed = 50;
+  
 }
 
 EG3.Level.prototype = {
@@ -17,33 +19,42 @@ EG3.Level.prototype = {
   preload: function() {
     console.log("Level1.preload");
   },
-  create: function() {
-    console.log("Level1.create");
+  onetimeCreate: function() {
 
     //Add background
     this.game.add.sprite(0,0,"bg");
-
+    
     //Start physics.  This may be moved to better facilitate "restarting"
     //a state
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.createBalls();
 
-    //For reasons I don't understand if I start them out at the same point the second
-    //image is a green box.  I'd seen this before.  It seems to work if I move them back
     this.playerBody = this.game.add.sprite(
       (this.game.world.width/2) - 25,
       (this.game.world.height/2) - 20, 'playerBody');
     this.playerBody.anchor.setTo(0.5, 0.5);
     this.game.physics.enable(this.playerBody, Phaser.Physics.ARCADE);
+    
+    this.deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
+    this.deadPlayerEye.anchor.setTo(0.5, 0.375);  
+    this.game.physics.enable(this.deadPlayerEye, Phaser.Physics.ARCADE);      
 
-    this.playerEye = this.game.add.sprite(0, 0, 'playerEye');
-    this.playerEye.anchor.setTo(0.5, 0.375);
-    this.game.physics.enable(this.playerEye, Phaser.Physics.ARCADE);
+    this.openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
+    this.openPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(this.openPlayerEye, Phaser.Physics.ARCADE);
+    this.currentPlayerEye = this.openPlayerEye;
 
-    this.playerEye.x = this.playerBody.x;
-    this.playerEye.y = this.playerBody.y;
-    this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);
+    this.currentPlayerEye.x = this.playerBody.x;
+    this.currentPlayerEye.y = this.playerBody.y;
+    this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
+    
+    this.againButtonGroup = this.game.add.group();
+    this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
+//    this.againButton;
+//    this.againButtonGroup.add(againButton);
+    this.againButton.anchor.setTo(0.5,0.5);    
+    this.againButtonGroup.visible = false;
 
     //Tap handler to move the player
     this.game.input.onTap.add(this.tapHandler, this);
@@ -68,7 +79,7 @@ EG3.Level.prototype = {
     //Existing high score
     var prevHigh = jQuery.cookie('high_score');
     if(!prevHigh) {
-      prevHigh = "1";
+      prevHigh = "0";
     }
     console.log("Pref High: " + prevHigh);
     this.highScoreDisplay = this.game.add.text(
@@ -80,14 +91,63 @@ EG3.Level.prototype = {
         "color": "white",
         "fill": "#ff0044"
       }
-      );
+      );  
+    this.createdOnce = true;
+  },
+  /**
+   * I didn't check if the name conflicts - should do that sometime
+   */
+  xreset: function() {
+  
+    //Hide the "again" button
+    this.againButtonGroup.visible = false;
+    
+    //TODO Re-align balls to the sides
+    
 
+    //Reset location of eye(s) and body
+    this.playerBody.x = (this.game.world.width/2) - 25;
+    this.playerBody.y = (this.game.world.height/2) - 20;
+    this.deadPlayerEye.x = -100;
+    this.deadPlayerEye.y = -100;
+
+    this.currentPlayerEye = this.openPlayerEye;;
+
+    this.currentPlayerEye.x = this.playerBody.x;
+    this.currentPlayerEye.y = this.playerBody.y;
+    this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
+
+    //re-add tap handler
+    this.game.input.onTap.add(this.tapHandler, this);
+
+    //The time display.  This is done last so it is highest in the "z" order.
+    //I could also learn about groups, but I'm being lazy right now.
+    this.clockDisplay.text = this.timeToDisplayTime(0);
+  },
+  create: function() {
+    console.log("Level1.create");
+    
+    if(!this.createdOnce) {
+      this.onetimeCreate();
+    }
+    else {
+      this.xreset();
+    }
+  },
+  /**
+   * Callback when "again" is clicked
+   */
+  againClicked: function() {
+    this.xreset();
   },
   /**
    * Takes time in millis and converts it to
    * "00.00" format
    */
   timeToDisplayTime: function(t) {
+    if(t == 0) {
+      return "00.00";
+    }
     var seconds = Math.floor(t/1000);
     var decis = t % 100;
     //TODO Fix this.  It isn't correct, but goes by too fast so it creates
@@ -124,14 +184,14 @@ EG3.Level.prototype = {
       this.playerBallCollisionNotification,
       this.playerBallCollisionProcess,
       this);
-    this.playerEye.x = this.playerBody.x;
-    this.playerEye.y = this.playerBody.y;
+    this.currentPlayerEye.x = this.playerBody.x;
+    this.currentPlayerEye.y = this.playerBody.y;
 
     //Kind-of a hack (I should add more "behavior" to the player
     //but prevents the dead "X" eye from following the pointer
     //(on desktop machines)
     if(!this.playerDead) {
-      this.playerEye.rotation = this.game.physics.arcade.angleToPointer(this.playerEye);
+      this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
     }
   },
   playerBallCollisionNotification: function(playerBody, ball) {
@@ -140,7 +200,7 @@ EG3.Level.prototype = {
 //    console.log("Player/ball collision");
   },
   playerBallCollisionProcess: function(playerBody, ball) {
-    console.log("Player/ball collision (process callback)");
+    console.log("Player/ball collision - process callback");
 
     if(this.playerDead) {
       //It is cute to still have the player bounce off of things as it decends
@@ -152,7 +212,7 @@ EG3.Level.prototype = {
     var diff = this.game.time.now - this.startTime;
     var prevHigh = jQuery.cookie("high_score");
     if(!prevHigh) {
-      prevHigh = 1;
+      prevHigh = 0;
     }
     console.log("Compare previous high score " + prevHigh + " to " + diff);
     if(prevHigh < diff) {
@@ -166,11 +226,10 @@ EG3.Level.prototype = {
     this.game.input.onTap.remove(this.tapHandler, this);
 
     //Replace the eye with the 'X'
-    this.playerEye.kill();
-    this.playerEye = this.game.add.sprite(0, 0, 'deadEye');
-    this.playerEye.anchor.setTo(0.5, 0.375);
-    this.playerEye.x = this.playerBody.x;
-    this.playerEye.y = this.playerBody.y;
+    this.currentPlayerEye = this.deadPlayerEye;    
+  
+    this.currentPlayerEye.x = this.playerBody.x;
+    this.currentPlayerEye.y = this.playerBody.y;
     this.playerBody.body.gravity.y = 300;
 
     //Tell the player sprite to care
@@ -178,6 +237,11 @@ EG3.Level.prototype = {
     //so I've read) then get a callback when it finally leaves
     this.playerBody.checkWorldBounds = true;
     this.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
+    
+    //TODO remove previous button listener, or figure out how to show/hide the button so we can create once
+    console.log("Add the \"again\" button");
+    //TODO I think I may have too many references dangling.  Need to be more smart w/ the group
+    this.againButtonGroup.visible = true;     
 
     return true;
   },
@@ -220,7 +284,7 @@ EG3.Level.prototype = {
       this.game.physics.enable(s, Phaser.Physics.ARCADE);
       s.body.collideWorldBounds = true;
       s.body.bounce.setTo(0.8, 0.8);
-      s.body.velocity.setTo(10 + Math.random() * 40, 10 + Math.random() * 40);
+      s.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
       s.body.bounce.x = 1;
       s.body.bounce.y = 1;
     }
