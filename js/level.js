@@ -8,7 +8,7 @@ EG3.Level = function() {
   this.timeHack = 0;
   this.playerSpeedFactor = 5;//bigger means slower
   this.ballSpeed = 50;
-  
+
 }
 
 EG3.Level.prototype = {
@@ -23,22 +23,24 @@ EG3.Level.prototype = {
 
     //Add background
     this.game.add.sprite(0,0,"bg");
-    
+
     //Start physics.  This may be moved to better facilitate "restarting"
     //a state
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.createBalls();
+    this.ballsToTheWalls();
 
     this.playerBody = this.game.add.sprite(
       (this.game.world.width/2) - 25,
       (this.game.world.height/2) - 20, 'playerBody');
     this.playerBody.anchor.setTo(0.5, 0.5);
     this.game.physics.enable(this.playerBody, Phaser.Physics.ARCADE);
-    
+    console.log("Initial velocity: " + this.playerBody.body.velocity);
+
     this.deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
-    this.deadPlayerEye.anchor.setTo(0.5, 0.375);  
-    this.game.physics.enable(this.deadPlayerEye, Phaser.Physics.ARCADE);      
+    this.deadPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(this.deadPlayerEye, Phaser.Physics.ARCADE);
 
     this.openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
     this.openPlayerEye.anchor.setTo(0.5, 0.375);
@@ -48,12 +50,12 @@ EG3.Level.prototype = {
     this.currentPlayerEye.x = this.playerBody.x;
     this.currentPlayerEye.y = this.playerBody.y;
     this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
-    
+
     this.againButtonGroup = this.game.add.group();
     this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
 //    this.againButton;
-//    this.againButtonGroup.add(againButton);
-    this.againButton.anchor.setTo(0.5,0.5);    
+    this.againButtonGroup.add(this.againButton);
+    this.againButton.anchor.setTo(0.5,0.5);
     this.againButtonGroup.visible = false;
 
     //Tap handler to move the player
@@ -91,25 +93,31 @@ EG3.Level.prototype = {
         "color": "white",
         "fill": "#ff0044"
       }
-      );  
+      );
     this.createdOnce = true;
   },
   /**
    * I didn't check if the name conflicts - should do that sometime
    */
   xreset: function() {
-  
+
     //Hide the "again" button
     this.againButtonGroup.visible = false;
-    
-    //TODO Re-align balls to the sides
-    
+
+    this.playerBody.checkWorldBounds = false;
+    this.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
+    this.playerBody.body.gravity.y = 0;
+    this.playerBody.body.velocity.x = 0;
+    this.playerBody.body.velocity.y = 0;
+
 
     //Reset location of eye(s) and body
     this.playerBody.x = (this.game.world.width/2) - 25;
     this.playerBody.y = (this.game.world.height/2) - 20;
     this.deadPlayerEye.x = -100;
     this.deadPlayerEye.y = -100;
+
+    this.openPlayerEye.revive();
 
     this.currentPlayerEye = this.openPlayerEye;;
 
@@ -123,10 +131,14 @@ EG3.Level.prototype = {
     //The time display.  This is done last so it is highest in the "z" order.
     //I could also learn about groups, but I'm being lazy right now.
     this.clockDisplay.text = this.timeToDisplayTime(0);
+
+    this.ballsToTheWalls();
+
+    this.playerDead = false;
   },
   create: function() {
     console.log("Level1.create");
-    
+
     if(!this.createdOnce) {
       this.onetimeCreate();
     }
@@ -226,8 +238,9 @@ EG3.Level.prototype = {
     this.game.input.onTap.remove(this.tapHandler, this);
 
     //Replace the eye with the 'X'
-    this.currentPlayerEye = this.deadPlayerEye;    
-  
+    this.currentPlayerEye.kill();
+    this.currentPlayerEye = this.deadPlayerEye;
+
     this.currentPlayerEye.x = this.playerBody.x;
     this.currentPlayerEye.y = this.playerBody.y;
     this.playerBody.body.gravity.y = 300;
@@ -237,11 +250,11 @@ EG3.Level.prototype = {
     //so I've read) then get a callback when it finally leaves
     this.playerBody.checkWorldBounds = true;
     this.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
-    
+
     //TODO remove previous button listener, or figure out how to show/hide the button so we can create once
     console.log("Add the \"again\" button");
     //TODO I think I may have too many references dangling.  Need to be more smart w/ the group
-    this.againButtonGroup.visible = true;     
+    this.againButtonGroup.visible = true;
 
     return true;
   },
@@ -254,6 +267,32 @@ EG3.Level.prototype = {
    */
   spriteLeftWorld: function() {
     console.log("Sprite left world");
+  },
+  ballsToTheWalls: function() {
+    //Try to distribute the balls along the walls so as to not
+    //begin the game in collision with each other or
+    //the player sprite
+    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
+    var childCount = 0;
+
+    this.balls.forEach(function(b) {
+      var leftSide = true;
+      if(childCount*2 >= this.numBalls) {
+        leftSide = false;
+      }
+      var startx = (leftSide?30:(this.game.world.width - 30));
+      var starty = (leftSide?
+        (childCount*ySpace):
+        ((childCount - ((this.numBalls)/2))*ySpace)
+        )+30;
+      b.x = startx;
+      b.y = starty;
+      b.body.bounce.setTo(0.8, 0.8);
+      b.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
+      b.body.bounce.x = 1;
+      b.body.bounce.y = 1;
+      childCount++;
+    }, this);
   },
   createBalls: function() {
     this.balls = this.game.add.group();
