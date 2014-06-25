@@ -104,6 +104,8 @@ EG3.Level.prototype = {
     //Hide the "again" button
     this.againButtonGroup.visible = false;
 
+    delete this.startTime;
+
     this.playerBody.checkWorldBounds = false;
     this.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
     this.playerBody.body.gravity.y = 0;
