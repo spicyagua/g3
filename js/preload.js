@@ -11,7 +11,7 @@ EG3.Preload.prototype = {
 
     //Nuking this for now.  Not enough to load to be significant (i.e.
     //the spinner just flashes even on my phone)
-    //this.preloadSprite = this.add.sprite(this.game.world.width/2,this.game.world.height/2, 'preloadeImage');
+    this.preloadSprite = this.add.sprite(this.game.world.width/2,this.game.world.height/2, 'preloadeImage');
 
     this.game.load.image('bg', 'assets/bg2.png');
     this.game.load.image('logo', 'assets/logo.png');    
