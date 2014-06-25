@@ -6,7 +6,7 @@ EG3.Level = function() {
   //Data members here
   this.numBalls = 6;
   this.timeHack = 0;
-  this.playerSpeedFactor = 5;//bigger means slower
+  this.playerSpeedFactor = 7;//bigger means slower
 }
 
 EG3.Level.prototype = {
