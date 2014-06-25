@@ -154,22 +154,7 @@ EG3.Level.prototype = {
   againClicked: function() {
     this.xreset();
   },
-  /**
-   * Takes time in millis and converts it to
-   * "00.00" format
-   */
-  timeToDisplayTime: function(t) {
-    if(t == 0) {
-      return "00.00";
-    }
-    var seconds = Math.floor(t/1000);
-    var decis = t % 100;
-    //TODO Fix this.  It isn't correct, but goes by too fast so it creates
-    //the illusion of a "real" time
-    if(decis < 10) {decis = '0' + decis;}
-    if(seconds < 10) {seconds = '0' + seconds;}
-    return seconds + "." + decis;
-  },
+
   update: function() {
     //To be "fair", wait until first update loop
     //to assign time
@@ -195,7 +180,7 @@ EG3.Level.prototype = {
     this.game.physics.arcade.collide(this.balls);
     this.game.physics.arcade.collide(this.playerBody,
       this.balls,
-      this.playerBallCollisionNotification,
+      this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
     this.currentPlayerEye.x = this.playerBody.x;
@@ -208,11 +193,7 @@ EG3.Level.prototype = {
       this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
     }
   },
-  playerBallCollisionNotification: function(playerBody, ball) {
-    //I have yet to figure out what this does and why it is called, but I need
-    //to provide it so I can get the next function
-//    console.log("Player/ball collision");
-  },
+
   playerBallCollisionProcess: function(playerBody, ball) {
     console.log("Player/ball collision - process callback");
 
@@ -270,32 +251,42 @@ EG3.Level.prototype = {
   spriteLeftWorld: function() {
     console.log("Sprite left world");
   },
-  ballsToTheWalls: function() {
-    //Try to distribute the balls along the walls so as to not
-    //begin the game in collision with each other or
-    //the player sprite
-    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
-    var childCount = 0;
 
-    this.balls.forEach(function(b) {
-      var leftSide = true;
-      if(childCount*2 >= this.numBalls) {
-        leftSide = false;
-      }
-      var startx = (leftSide?30:(this.game.world.width - 30));
-      var starty = (leftSide?
-        (childCount*ySpace):
-        ((childCount - ((this.numBalls)/2))*ySpace)
-        )+30;
-      b.x = startx;
-      b.y = starty;
-      b.body.bounce.setTo(0.8, 0.8);
-      b.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
-      b.body.bounce.x = 1;
-      b.body.bounce.y = 1;
-      childCount++;
-    }, this);
+
+  /**
+   * Callback when user taps on screen
+   */
+  tapHandler: function() {
+    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
+    if(this.moveTween.isRunning) {
+      console.log("Tween running.  Stop it");
+      this.moveTween.stop();
+    }
+    else {
+      console.log("Tween not running.");
+    }
+
+    //Create the tween to move the player
+    this.moveTween = this.game.add.tween(this.playerBody);
+
+    //so the player moves at a constant *speed*, the tween should have
+    //a duration proportional to the distance it will travel
+    var duration = this.playerSpeedFactor *
+      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerBody, this.game.input.activePointer));
+
+    this.moveTween.to(
+      {
+        x: this.game.input.activePointer.x,
+        y: this.game.input.activePointer.y
+      },
+      duration,
+      Phaser.Easing.Quadratic.In
+    );
+    console.log("Calling start on tween");
+    this.moveTween.start();
   },
+  
+  //==================== Asset Management ==============================
   createBalls: function() {
     this.balls = this.game.add.group();
     this.balls.enableBody = true;
@@ -329,37 +320,61 @@ EG3.Level.prototype = {
       s.body.bounce.x = 1;
       s.body.bounce.y = 1;
     }
-  },
+  },  
+  
+  ballsToTheWalls: function() {
+    //Try to distribute the balls along the walls so as to not
+    //begin the game in collision with each other or
+    //the player sprite
+    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
+    var childCount = 0;
+
+    this.balls.forEach(function(b) {
+      var leftSide = true;
+      if(childCount*2 >= this.numBalls) {
+        leftSide = false;
+      }
+      var startx = (leftSide?30:(this.game.world.width - 30));
+      var starty = (leftSide?
+        (childCount*ySpace):
+        ((childCount - ((this.numBalls)/2))*ySpace)
+        )+30;
+      b.x = startx;
+      b.y = starty;
+      b.body.bounce.setTo(0.8, 0.8);
+      b.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
+      b.body.bounce.x = 1;
+      b.body.bounce.y = 1;
+      childCount++;
+    }, this);
+  },  
+    
+  
+  //==================== Utilities ==============================
+  
   /**
-   * Callback when user taps on screen
+   * Maybe it is my lack-of JS knowledge, but I needed a function
+   * as a placeholder to apply a second optional function.  
+   *
+   * This is a no-op
    */
-  tapHandler: function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
+  uselessFunction: function() {
+  },  
+  
+  /**
+   * Takes time in millis and converts it to
+   * "00.00" format
+   */
+  timeToDisplayTime: function(t) {
+    if(t == 0) {
+      return "00.00";
     }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.playerBody);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.playerSpeedFactor *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerBody, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
-  }
+    var seconds = Math.floor(t/1000);
+    var decis = t % 100;
+    //TODO Fix this.  It isn't correct, but goes by too fast so it creates
+    //the illusion of a "real" time
+    if(decis < 10) {decis = '0' + decis;}
+    if(seconds < 10) {seconds = '0' + seconds;}
+    return seconds + "." + decis;
+  },  
 };
