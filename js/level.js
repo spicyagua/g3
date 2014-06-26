@@ -1,38 +1,46 @@
 var EG3 = EG3 || {};
 
 
+/**
+ * Object to serve as prototype of other levels (i.e. common stuff).
+ */
 EG3.Level = function() {
   console.log("Level constructor invoked");
-  //Data members here
-  this.timeHack = 0;
-  this.playerSpeedFactor = 5;//bigger means slower
-  this.ballSpeed = 50;
-
-  // Spent too long as a Java programmer...
-  //this.createdOnce = false;
 }
 
 EG3.Level.prototype = {
 
-
-
+  /**
+   * Called by Phaser.  In turn calls either "xreset" or "oneTimeCreate"
+   *
+   */
+  create: function() {
+    console.log("Level.create");
+    if(!this.createdOnce) {
+      this.onetimeCreate();
+      this.createdOnce = true;
+    }
+    else {
+      this.reset();
+    }
+  },
 
 
   /**
-   *
+   * Not used, but an example of cookie plugin once I need it
    */
   newHighScore: function(diff) {
     jQuery.cookie('high_score', diff, { expires: 28} );
     this.highScoreDisplay.text = this.timeToDisplayTime(diff);
   },
 
-
-
-  //==================== Asset Management ==============================
-
   /**
    * Creates a group of balls (duh).  Currently, they bounce around but
    * may make this a parameter at some point
+   *
+   * @param imageName imageName (from cache)
+   * @param numBalls
+   * @param speed (50 is "reasonable")
    */
   createBallGroup: function(imageName, numBalls, speed) {
 
@@ -97,64 +105,6 @@ EG3.Level.prototype = {
 
   },
 
-  /**
-   *
-   */
-/*
-  createBalls: function() {
-    this.greenBalls = this.game.add.group();
-    this.greenBalls.enableBody = true;
-
-    for (var i = 0; i < this.numBalls; i++) {
-      var s = this.greenBalls.create(0,0,'greenBall');
-      s.name = 'greenBall' + i;
-      this.game.physics.enable(s, Phaser.Physics.ARCADE);
-      s.body.collideWorldBounds = true;
-      s.body.bounce.setTo(0.8, 0.8);
-      s.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
-      s.body.bounce.x = 1;
-      s.body.bounce.y = 1;
-    }
-
-  },
-*/
-  /**
-   *
-   */
-/*
-  ballsToTheWalls: function() {
-
-    var foo = this.game.cache.getImage("greenBall");
-    console.log("Image width: " + foo.width);
-
-    //Try to distribute the balls along the walls so as to not
-    //begin the game in collision with each other or
-    //the player sprite
-    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
-    var childCount = 0;
-
-    this.greenBalls.forEach(function(b) {
-      var leftSide = true;
-      if(childCount*2 >= this.numBalls) {
-        leftSide = false;
-      }
-      var startx = (leftSide?30:(this.game.world.width - 30));
-      var starty = (leftSide?
-        (childCount*ySpace):
-        ((childCount - ((this.numBalls)/2))*ySpace)
-        )+30;
-      b.x = startx;
-      b.y = starty;
-      b.body.bounce.setTo(0.8, 0.8);
-      b.body.velocity.setTo(10 + Math.random() * this.ballSpeed, 10 + Math.random() * this.ballSpeed);
-      b.body.bounce.x = 1;
-      b.body.bounce.y = 1;
-      childCount++;
-    }, this);
-  },
-*/
-
-  //==================== Utilities ==============================
 
   /**
    * Still haven't found a good way to
