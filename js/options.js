@@ -9,7 +9,7 @@ EG3.Options.prototype = {
   preload: function() {
     console.log("Options.preload");
     this.game.add.sprite(0,0,"splash");
-    this.game.add.sprite(50,40,"logo");    
+    this.game.add.sprite(50,40,"logo");
 //    this.gameLogo = this.game.add.sprite(this.game.width/2-120, 100, 'gameLogo');
     yVal = (this.game.height/6)*5;
     this.startButton = this.game.add.button(this.game.width/2, yVal, 'playButton', this.startClicked, this);
@@ -61,6 +61,6 @@ EG3.Options.prototype = {
   },
 
  startClicked: function() {
-   this.game.state.start('level1');
+   this.game.state.start('prelevel');
  }
 };

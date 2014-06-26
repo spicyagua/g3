@@ -8,7 +8,7 @@ EG3.Level = function() {
   this.timeHack = 0;
   this.playerSpeedFactor = 5;//bigger means slower
   this.ballSpeed = 50;
-  
+
   // Spent too long as a Java programmer...
   //this.createdOnce = false;
 }
@@ -29,7 +29,7 @@ EG3.Level.prototype = {
       this.xreset();
     }
   },
-  
+
   /**
    * Callback when "again" is clicked
    */
@@ -87,7 +87,7 @@ EG3.Level.prototype = {
 
     return true;
   },
-  
+
   /**
    *
    */
@@ -95,7 +95,7 @@ EG3.Level.prototype = {
     jQuery.cookie('high_score', diff, { expires: 28} );
     this.highScoreDisplay.text = this.timeToDisplayTime(diff);
   },
-  
+
   /**
    * Callback when a dead sprite finally falls off the world
    */
@@ -136,9 +136,9 @@ EG3.Level.prototype = {
     console.log("Calling start on tween");
     this.moveTween.start();
   },
-  
+
   //==================== Asset Management ==============================
-  
+
   /**
    *
    */
@@ -147,7 +147,7 @@ EG3.Level.prototype = {
     this.greenBalls.enableBody = true;
 
     for (var i = 0; i < this.numBalls; i++) {
-      var s = this.greenBalls.create(0,0,'greenBall');        
+      var s = this.greenBalls.create(0,0,'greenBall');
       s.name = 'greenBall' + i;
       this.game.physics.enable(s, Phaser.Physics.ARCADE);
       s.body.collideWorldBounds = true;
@@ -157,7 +157,7 @@ EG3.Level.prototype = {
       s.body.bounce.y = 1;
     }
   },
-    
+
   /**
    *
    */
@@ -186,20 +186,64 @@ EG3.Level.prototype = {
       b.body.bounce.y = 1;
       childCount++;
     }, this);
-  },  
-    
-  
+  },
+
+
   //==================== Utilities ==============================
-  
+
+
+  /**
+   * New idea in "reuse"
+   * Gets passed the total time (in millis)
+   * For now assumes "seconds"
+   *
+   * A mix of display and logic but who cares
+   */
+  createCountDownTimer: function(duration) {
+
+    var that = this;
+    var startTime = 0;
+    var endTime = 0;
+
+    var clockDisplay = this.game.add.text(
+      20,
+      20,
+      that.timeToDisplayTime(duration),
+      {
+        "font": "36px monospace",
+        "color": "white",
+        "fill": "#ff0044"
+      }
+      );
+    return {
+      startTimming: function() {
+        startTime = this.game.time.now;
+        endTime = startTime + duration;
+      },
+      update: function() {
+        var now = this.game.time.now;
+        if(now >= endTime) {
+          clockDisplay.text("00.00");
+          return true;
+        }
+        var diff = endTime-now;
+        clockDisplay.text = that.timeToDisplayTime(diff);
+      },
+      reset: function(duration) {
+        clockDisplay.text = that.timeToDisplayTime(duration);
+      }
+    };
+  },
+
   /**
    * Maybe it is my lack-of JS knowledge, but I needed a function
-   * as a placeholder to apply a second optional function.  
+   * as a placeholder to apply a second optional function.
    *
    * This is a no-op
    */
   uselessFunction: function() {
-  },  
-  
+  },
+
   /**
    * Takes time in millis and converts it to
    * "00.00" format
@@ -215,5 +259,5 @@ EG3.Level.prototype = {
     if(decis < 10) {decis = '0' + decis;}
     if(seconds < 10) {seconds = '0' + seconds;}
     return seconds + "." + decis;
-  },  
+  },
 };

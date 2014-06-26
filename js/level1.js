@@ -1,8 +1,26 @@
 var EG3 = EG3 || {};
 
 EG3.Level1 = function() {
+
   console.log("Level1 function invoked");
   this.numBalls = 14;
+
+  /*
+  this.playerBody
+  this.deadPlayerEye
+  this.currentPlayerEye
+  this.openPlayerEye
+  this.againButtonGroup
+  this.againButton
+  this.moveTween
+  this.clockDisplay
+  this.highScoreDisplay
+  this.createdOnce
+  this.playerDead
+  this.startTime
+  this.greenBalls
+
+  */
 
   this.onetimeCreate = function() {
 
@@ -182,12 +200,17 @@ EG3.Level1 = function() {
     }
   };
 
+  this.shutDown = function() {
+    console.log("Shutting down level1");
+  };
+
 
 
 };
 
 EG3.Level1.constructor = EG3.Level1;
 
+EG3.Level1.description = "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds";
 
 EG3.Level1.prototype = new EG3.Level();
 
