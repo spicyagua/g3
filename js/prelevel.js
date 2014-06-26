@@ -42,7 +42,6 @@ EG3.Prelevel.prototype = {
         );
     }
 
-    EG3.app.advanceLevel();
     this.descBox.text = EG3.app.getCurrentLevelDesc();
   },
   update: function() {

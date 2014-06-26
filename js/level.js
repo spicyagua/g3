@@ -191,6 +191,13 @@ EG3.Level.prototype = {
 
   //==================== Utilities ==============================
 
+  /**
+   * Still haven't found a good way to
+   * use phaser and OO instincts, but this is a start
+   */
+  createPlayerWrapper: function() {
+
+  },
 
   /**
    * New idea in "reuse"
@@ -217,13 +224,13 @@ EG3.Level.prototype = {
       );
     return {
       startTimming: function() {
-        startTime = this.game.time.now;
+        startTime = that.game.time.now;
         endTime = startTime + duration;
       },
       update: function() {
-        var now = this.game.time.now;
+        var now = that.game.time.now;
         if(now >= endTime) {
-          clockDisplay.text("00.00");
+          clockDisplay.text = "00.00";
           return true;
         }
         var diff = endTime-now;

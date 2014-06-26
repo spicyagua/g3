@@ -5,13 +5,22 @@ EG3.app = (function() {
   var relWidth = 400;
   var relHeight = 600;
   var game = null;
-  var currentLevelPtr = -1;
+  var currentLevelPtr = 0;
 
   var levels = [
     {name: "level1", jsType: "Level1"}
   ];
 
   var _main = function() {
+
+    var prevLevel = jQuery.cookie("current_level");
+    if(!prevLevel) {
+      currentLevelPtr = 0;
+    }
+    else {
+      currentLevelPtr = prevLevel;
+    }
+
     game = new Phaser.Game(relWidth, relHeight, Phaser.AUTO, 'G3');
 
     // Game States
@@ -29,7 +38,10 @@ EG3.app = (function() {
     REL_WIDTH: relWidth,
     REL_HEIGHT: relHeight,
     main: _main,
-    advanceLevel: function() {currentLevelPtr++;},
+    advanceLevel: function() {
+      currentLevelPtr++;
+      jQuery.cookie("current_level", currentLevelPtr, { expires: 28} );
+    },
     getCurrentLevelName: function() {return levels[currentLevelPtr].name;},
     getCurrentLevelDesc: function() {return EG3[levels[currentLevelPtr].jsType]["description"];}
   };

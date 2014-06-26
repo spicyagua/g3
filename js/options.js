@@ -8,6 +8,10 @@ EG3.Options = function() {
 EG3.Options.prototype = {
   preload: function() {
     console.log("Options.preload");
+
+    //Start physics.
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
     this.game.add.sprite(0,0,"splash");
     this.game.add.sprite(50,40,"logo");
 //    this.gameLogo = this.game.add.sprite(this.game.width/2-120, 100, 'gameLogo');

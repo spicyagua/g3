@@ -4,6 +4,9 @@ EG3.Level1 = function() {
 
   console.log("Level1 function invoked");
   this.numBalls = 14;
+  this.TOTAL_TIME = 1000*20;
+
+  this.firstUpdate = true;
 
   /*
   this.playerBody
@@ -13,12 +16,11 @@ EG3.Level1 = function() {
   this.againButtonGroup
   this.againButton
   this.moveTween
-  this.clockDisplay
-  this.highScoreDisplay
   this.createdOnce
   this.playerDead
-  this.startTime
   this.greenBalls
+
+  this.countownClock;
 
   */
 
@@ -27,9 +29,6 @@ EG3.Level1 = function() {
     //Add background
     this.game.add.sprite(0,0,"bg");
 
-    //Start physics.  This may be moved to better facilitate "restarting"
-    //a state
-    this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.createBalls();
     this.ballsToTheWalls();
@@ -68,6 +67,9 @@ EG3.Level1 = function() {
     //null checks later.  The tween isn't used for anything
     this.moveTween = this.game.add.tween(this.playerBody);
 
+    this.countownClock = this.createCountDownTimer(this.TOTAL_TIME);
+
+/*
     //The time display.  This is done last so it is highest in the "z" order.
     //I could also learn about groups, but I'm being lazy right now.
     this.clockDisplay = this.game.add.text(
@@ -97,6 +99,7 @@ EG3.Level1 = function() {
         "fill": "#ff0044"
       }
       );
+*/
     this.createdOnce = true;
   };
 
@@ -108,7 +111,7 @@ EG3.Level1 = function() {
     //Hide the "again" button
     this.againButtonGroup.visible = false;
 
-    delete this.startTime;
+    this.firstUpdate = true;
 
     this.playerBody.checkWorldBounds = false;
     this.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
@@ -136,7 +139,9 @@ EG3.Level1 = function() {
 
     //The time display.  This is done last so it is highest in the "z" order.
     //I could also learn about groups, but I'm being lazy right now.
-    this.clockDisplay.text = this.timeToDisplayTime(0);
+//    this.clockDisplay.text = this.timeToDisplayTime(0);
+
+    this.countownClock.reset();
 
     this.ballsToTheWalls();
 
@@ -162,6 +167,7 @@ EG3.Level1 = function() {
    *
    */
   this.update = function() {
+/*
     //To be "fair", wait until first update loop
     //to assign time
     if(!this.startTime) {
@@ -179,7 +185,20 @@ EG3.Level1 = function() {
       }
       this.clockDisplay.text = this.timeToDisplayTime(diff);
     }
+*/
+    if(this.firstUpdate) {
+      this.firstUpdate = false;
+      this.countownClock.startTimming();
+    }
+    else {
+      if(this.countownClock.update()) {
+        console.log("Need a victory method and plan of action");
+        EG3.app.advanceLevel();
+        //change state
+        //return
+      }
 
+    }
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
