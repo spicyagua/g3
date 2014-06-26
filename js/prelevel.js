@@ -16,7 +16,7 @@ EG3.Prelevel.prototype = {
   },
   create: function() {
     console.log("Prelevel.create");
-    if(!this.startButton) {
+//    if(!this.startButton) {
     //Add background
       this.game.add.sprite(0,0,"bg");
       yVal = (this.game.height/8)*7;
@@ -40,8 +40,9 @@ EG3.Prelevel.prototype = {
           "wordWrapWidth": 340-20
         }
         );
-    }
+//    }
 
+    console.log("Desc: " + EG3.app.getCurrentLevelDesc());
     this.descBox.text = EG3.app.getCurrentLevelDesc();
   },
   update: function() {

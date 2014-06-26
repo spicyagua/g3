@@ -8,7 +8,8 @@ EG3.app = (function() {
   var currentLevelPtr = 0;
 
   var levels = [
-    {name: "level1", jsType: "Level1"}
+    {name: "level1", jsType: "Level1"},
+    {name: "level2", jsType: "Level2"}
   ];
 
   var _main = function() {
@@ -31,6 +32,8 @@ EG3.app = (function() {
     game.state.add('preload', EG3.Preload);
     game.state.add('options', EG3.Options);
     game.state.add('level1', EG3.Level1);
+    game.state.add('level2', EG3.Level2);
+
     game.state.add('prelevel', new EG3.Prelevel());
 
     game.state.start('bootup');
@@ -46,7 +49,7 @@ EG3.app = (function() {
       jQuery.cookie("current_level", currentLevelPtr, { expires: 28} );
     },
     getCurrentLevelName: function() {return levels[currentLevelPtr].name;},
-    getCurrentLevelDesc: function() {return EG3[levels[currentLevelPtr].jsType]["description"];}
+    getCurrentLevelDesc: function() {console.log("Pointer: " + currentLevelPtr);return EG3[levels[currentLevelPtr].jsType]["description"];}
   };
 }());
 

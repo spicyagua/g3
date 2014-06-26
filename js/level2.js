@@ -1,11 +1,11 @@
 var EG3 = EG3 || {};
 
-EG3.Level1 = function() {
+EG3.Level2 = function() {
 
-  console.log("Level1 function invoked");
-  this.numBalls = 4;
+  console.log("Level2 function invoked");
+  this.numBalls = 14;
   this.ballSpeed = 50;
-  this.totalTime = 1000*2;
+  this.totalTime = 1000*20;
   this.playerSpeedFactor = 5;//bigger means slower
   this.firstUpdate = true;
 
@@ -21,7 +21,7 @@ EG3.Level1 = function() {
    *
    */
   this.onetimeCreate = function() {
-    console.log("Level1.onetimeCreate");
+    console.log("Level2.onetimeCreate");
 
     //Add background
     this.game.add.sprite(0,0,"bg");
@@ -86,8 +86,8 @@ EG3.Level1 = function() {
       if(!this.playerDead && this.countownClock.update()) {
         console.log("Need a victory method and plan of action");
         EG3.app.advanceLevel();
-        this.game.state.start('prelevel');
-        return;
+        //change state
+        //return
       }
 
     }
@@ -183,10 +183,10 @@ EG3.Level1 = function() {
   };
 };
 
-EG3.Level1.constructor = EG3.Level1;
+EG3.Level2.constructor = EG3.Level2;
 
-EG3.Level1.description = "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds";
+EG3.Level2.description = "This is level 2";
 
-EG3.Level1.prototype = new EG3.Level();
+EG3.Level2.prototype = new EG3.Level();
 
 

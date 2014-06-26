@@ -2,7 +2,8 @@ var EG3 = EG3 || {};
 
 
 /**
- * Object to serve as prototype of other levels (i.e. common stuff).
+ * Object to serve as prototype of other levels (i.e. common stuff).  Children should
+ * not have a "create" method and instead use "oneTimeCreate" and "reset"
  */
 EG3.Level = function() {
   console.log("Level constructor invoked");
@@ -11,20 +12,48 @@ EG3.Level = function() {
 EG3.Level.prototype = {
 
   /**
-   * Called by Phaser.  In turn calls either "xreset" or "oneTimeCreate"
+   * Called by Phaser.  In turn calls either "reset" to prepare for the
+   * next attempt at the level or "oneTimeCreate" initially
    *
    */
   create: function() {
     console.log("Level.create");
+
+    //For child levels
     if(!this.createdOnce) {
       this.onetimeCreate();
       this.createdOnce = true;
+
+      this.againButtonGroup = this.game.add.group();
+      this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
+      this.againButtonGroup.add(this.againButton);
+      this.againButton.anchor.setTo(0.5,0.5);
+      this.againButtonGroup.visible = false;
+
     }
     else {
       this.reset();
     }
   },
 
+  /**
+   * Called by children when the level fails.  Game is paused until
+   * user hits "again" button which in turn calls "reset" and the
+   * game resumes.
+   */
+  levelFailed: function() {
+    this.againButtonGroup.visible = true;
+  },
+
+  /**
+   * Callback when "again" is clicked
+   */
+  againClicked: function() {
+    this.reset();
+    //Hide the "again" button
+    this.againButtonGroup.visible = false;
+
+  },
 
   /**
    * Not used, but an example of cookie plugin once I need it
@@ -46,12 +75,10 @@ EG3.Level.prototype = {
 
     var that = this;
 
+    //Cache the image dimensions.  We'll use them a lot later
     var img = this.game.cache.getImage(imageName);
-
-    //Cache the dimensions.  We'll use them a lot later
     var _imgWidth = img.width;
     var _imgHeight = img.height;
-
     img = null;
 
     var _ballGroup = this.game.add.group();
