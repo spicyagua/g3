@@ -13,12 +13,23 @@ EG3.Level = function() {
 
 EG3.Level.prototype = {
 
+  /**
+   *
+   */
   init: function(params) {
     console.log("Init called.  This is how I can pass state between ... states");
   },
+  
+  /**
+   *
+   */
   preload: function() {
     console.log("Level1.preload");
   },
+  
+  /**
+   *
+   */
   onetimeCreate: function() {
 
     //Add background
@@ -96,6 +107,7 @@ EG3.Level.prototype = {
       );
     this.createdOnce = true;
   },
+  
   /**
    * I didn't check if the name conflicts - should do that sometime
    */
@@ -138,6 +150,10 @@ EG3.Level.prototype = {
 
     this.playerDead = false;
   },
+  
+  /**
+   *
+   */
   create: function() {
     console.log("Level1.create");
 
@@ -148,6 +164,7 @@ EG3.Level.prototype = {
       this.xreset();
     }
   },
+  
   /**
    * Callback when "again" is clicked
    */
@@ -155,6 +172,9 @@ EG3.Level.prototype = {
     this.xreset();
   },
 
+  /**
+   *
+   */
   update: function() {
     //To be "fair", wait until first update loop
     //to assign time
@@ -177,9 +197,9 @@ EG3.Level.prototype = {
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
-    this.game.physics.arcade.collide(this.balls);
+    this.game.physics.arcade.collide(this.greenBalls);
     this.game.physics.arcade.collide(this.playerBody,
-      this.balls,
+      this.greenBalls,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
@@ -194,6 +214,9 @@ EG3.Level.prototype = {
     }
   },
 
+  /**
+   *
+   */
   playerBallCollisionProcess: function(playerBody, ball) {
     console.log("Player/ball collision - process callback");
 
@@ -241,10 +264,15 @@ EG3.Level.prototype = {
 
     return true;
   },
+  
+  /**
+   *
+   */
   newHighScore: function(diff) {
     jQuery.cookie('high_score', diff, { expires: 28} );
     this.highScoreDisplay.text = this.timeToDisplayTime(diff);
   },
+  
   /**
    * Callback when a dead sprite finally falls off the world
    */
@@ -287,31 +315,16 @@ EG3.Level.prototype = {
   },
   
   //==================== Asset Management ==============================
+  
+  /**
+   *
+   */
   createBalls: function() {
-    this.balls = this.game.add.group();
-    this.balls.enableBody = true;
-
-    //Try to distribute the balls along the walls so as to not
-    //begin the game in collision with each other or
-    //the player sprite
-    var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
+    this.greenBalls = this.game.add.group();
+    this.greenBalls.enableBody = true;
 
     for (var i = 0; i < this.numBalls; i++) {
-      var leftSide = true;
-      if(i*2 >= this.numBalls) {
-        leftSide = false;
-      }
-      var startx = (leftSide?30:(this.game.world.width - 30));
-      var starty = (leftSide?
-        (i*ySpace):
-        ((i - ((this.numBalls)/2))*ySpace)
-        )+30;
-      console.log("(" + i + ") Create ball at: " + startx + ", " + starty);
-      var s = this.balls.create(
-        startx,
-        starty,
-        'greenBall');
-
+      var s = this.greenBalls.create(0,0,'greenBall');        
       s.name = 'greenBall' + i;
       this.game.physics.enable(s, Phaser.Physics.ARCADE);
       s.body.collideWorldBounds = true;
@@ -320,8 +333,11 @@ EG3.Level.prototype = {
       s.body.bounce.x = 1;
       s.body.bounce.y = 1;
     }
-  },  
-  
+  },
+    
+  /**
+   *
+   */
   ballsToTheWalls: function() {
     //Try to distribute the balls along the walls so as to not
     //begin the game in collision with each other or
@@ -329,7 +345,7 @@ EG3.Level.prototype = {
     var ySpace = (this.game.world.height-60)/((this.numBalls-2)/2);
     var childCount = 0;
 
-    this.balls.forEach(function(b) {
+    this.greenBalls.forEach(function(b) {
       var leftSide = true;
       if(childCount*2 >= this.numBalls) {
         leftSide = false;
