@@ -3,7 +3,7 @@ var EG3 = EG3 || {};
 EG3.Level1 = function() {
   console.log("Level1 function invoked");
   this.numBalls = 14;
-  
+
   this.onetimeCreate = function() {
 
     //Add background
@@ -81,7 +81,7 @@ EG3.Level1 = function() {
       );
     this.createdOnce = true;
   };
-  
+
   /**
    * I didn't check if the name conflicts - should do that sometime
    */
@@ -123,27 +123,27 @@ EG3.Level1 = function() {
     this.ballsToTheWalls();
 
     this.playerDead = false;
-  };  
-  
+  };
+
   /**
    *
    */
   this.init = function(params) {
     console.log("Init called.  This is how I can pass state between ... states");
   };
-  
+
   /**
    *
    */
   this.preload = function() {
     console.log("Level1.preload");
   };
-  
+
 
   /**
    *
    */
-  this.update =h function() {
+  this.update = function() {
     //To be "fair", wait until first update loop
     //to assign time
     if(!this.startTime) {
@@ -181,9 +181,9 @@ EG3.Level1 = function() {
       this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
     }
   };
-   
-  
-  
+
+
+
 };
 
 EG3.Level1.constructor = EG3.Level1;
