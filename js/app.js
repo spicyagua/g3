@@ -21,6 +21,9 @@ EG3.app = (function() {
       currentLevelPtr = prevLevel;
     }
 
+    //TODO Remove this hack
+    currentLevelPtr = 0;
+
     game = new Phaser.Game(relWidth, relHeight, Phaser.AUTO, 'G3');
 
     // Game States

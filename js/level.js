@@ -4,7 +4,6 @@ var EG3 = EG3 || {};
 EG3.Level = function() {
   console.log("Level constructor invoked");
   //Data members here
-  this.numBalls = 6;
   this.timeHack = 0;
   this.playerSpeedFactor = 5;//bigger means slower
   this.ballSpeed = 50;
@@ -16,77 +15,8 @@ EG3.Level = function() {
 EG3.Level.prototype = {
 
 
-  /**
-   *
-   */
-  create: function() {
-    console.log("Level1.create");
 
-    if(!this.createdOnce) {
-      this.onetimeCreate();
-    }
-    else {
-      this.xreset();
-    }
-  },
 
-  /**
-   * Callback when "again" is clicked
-   */
-  againClicked: function() {
-    this.xreset();
-  },
-
-  /**
-   *
-   */
-  playerBallCollisionProcess: function(playerBody, ball) {
-    console.log("Player/ball collision - process callback");
-
-    if(this.playerDead) {
-      //It is cute to still have the player bounce off of things as it decends
-      //into the abyss
-      return true;
-    }
-
-    //Time
-    var diff = this.game.time.now - this.startTime;
-    var prevHigh = jQuery.cookie("high_score");
-    if(!prevHigh) {
-      prevHigh = 0;
-    }
-    console.log("Compare previous high score " + prevHigh + " to " + diff);
-    if(prevHigh < diff) {
-      this.newHighScore(diff);
-    }
-
-    this.playerDead = true;
-
-    //Kill some working-game things
-    this.moveTween.stop();
-    this.game.input.onTap.remove(this.tapHandler, this);
-
-    //Replace the eye with the 'X'
-    this.currentPlayerEye.kill();
-    this.currentPlayerEye = this.deadPlayerEye;
-
-    this.currentPlayerEye.x = this.playerBody.x;
-    this.currentPlayerEye.y = this.playerBody.y;
-    this.playerBody.body.gravity.y = 300;
-
-    //Tell the player sprite to care
-    //if it leaves the world (normally expensive
-    //so I've read) then get a callback when it finally leaves
-    this.playerBody.checkWorldBounds = true;
-    this.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
-
-    //TODO remove previous button listener, or figure out how to show/hide the button so we can create once
-    console.log("Add the \"again\" button");
-    //TODO I think I may have too many references dangling.  Need to be more smart w/ the group
-    this.againButtonGroup.visible = true;
-
-    return true;
-  },
 
   /**
    *
@@ -96,52 +26,81 @@ EG3.Level.prototype = {
     this.highScoreDisplay.text = this.timeToDisplayTime(diff);
   },
 
-  /**
-   * Callback when a dead sprite finally falls off the world
-   */
-  spriteLeftWorld: function() {
-    console.log("Sprite left world");
-  },
 
-
-  /**
-   * Callback when user taps on screen
-   */
-  tapHandler: function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
-    }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.playerBody);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.playerSpeedFactor *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerBody, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
-  },
 
   //==================== Asset Management ==============================
 
   /**
+   * Creates a group of balls (duh).  Currently, they bounce around but
+   * may make this a parameter at some point
+   */
+  createBallGroup: function(imageName, numBalls, speed) {
+
+    var that = this;
+
+    var img = this.game.cache.getImage(imageName);
+
+    //Cache the dimensions.  We'll use them a lot later
+    var _imgWidth = img.width;
+    var _imgHeight = img.height;
+
+    img = null;
+
+    var _ballGroup = this.game.add.group();
+    _ballGroup.enableBody = true;
+
+    for (var i = 0; i < numBalls; i++) {
+      var s = _ballGroup.create(0,0,imageName);
+      s.name = imageName + i;
+      this.game.physics.enable(s, Phaser.Physics.ARCADE);
+      s.body.collideWorldBounds = true;
+      s.body.bounce.setTo(0.8, 0.8);
+      s.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
+      s.body.bounce.x = 1;
+      s.body.bounce.y = 1;
+    }
+
+    /**
+     * Distribute balls along the walls
+     */
+    var _bttw = function() {
+      //Try to distribute the balls along the walls so as to not
+      //begin the game in collision with each other or
+      //the player sprite
+      var ySpace = (that.game.world.height-(_imgHeight*2))/((that.numBalls-2)/2);
+      var childCount = 0;
+
+      _ballGroup.forEach(function(b) {
+        var leftSide = true;
+        if(childCount*2 >= numBalls) {
+          leftSide = false;
+        }
+        var startx = (leftSide?_imgWidth:(that.game.world.width - _imgWidth));
+        var starty = (leftSide?
+          (childCount*ySpace):
+          ((childCount - ((numBalls)/2))*ySpace)
+          )+_imgWidth;
+        b.x = startx;
+        b.y = starty;
+        b.body.bounce.setTo(0.8, 0.8);
+        b.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
+        b.body.bounce.x = 1;
+        b.body.bounce.y = 1;
+        childCount++;
+      }, that);
+    };
+
+    return {
+      group: _ballGroup,
+      ballsToTheWalls: _bttw
+    };
+
+  },
+
+  /**
    *
    */
+/*
   createBalls: function() {
     this.greenBalls = this.game.add.group();
     this.greenBalls.enableBody = true;
@@ -156,12 +115,18 @@ EG3.Level.prototype = {
       s.body.bounce.x = 1;
       s.body.bounce.y = 1;
     }
-  },
 
+  },
+*/
   /**
    *
    */
+/*
   ballsToTheWalls: function() {
+
+    var foo = this.game.cache.getImage("greenBall");
+    console.log("Image width: " + foo.width);
+
     //Try to distribute the balls along the walls so as to not
     //begin the game in collision with each other or
     //the player sprite
@@ -187,7 +152,7 @@ EG3.Level.prototype = {
       childCount++;
     }, this);
   },
-
+*/
 
   //==================== Utilities ==============================
 
@@ -197,7 +162,81 @@ EG3.Level.prototype = {
    */
   createPlayerWrapper: function() {
 
+    var that = this;
+    var alive = true;
+
+    var playerBody = this.game.add.sprite(
+      (this.game.world.width/2) - 25,
+      (this.game.world.height/2) - 20, 'playerBody');
+    playerBody.anchor.setTo(0.5, 0.5);
+    this.game.physics.enable(playerBody, Phaser.Physics.ARCADE);
+
+    var deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
+    deadPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(deadPlayerEye, Phaser.Physics.ARCADE);
+
+    var openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
+    openPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(openPlayerEye, Phaser.Physics.ARCADE);
+    var currentPlayerEye = openPlayerEye;
+
+    currentPlayerEye.x = playerBody.x;
+    currentPlayerEye.y = playerBody.y;
+    currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(currentPlayerEye);
+
+    var _revivePlayer = function() {
+
+      playerBody.checkWorldBounds = false;
+      playerBody.body.gravity.y = 0;
+      playerBody.body.velocity.x = 0;
+      playerBody.body.velocity.y = 0;
+
+      //Reset location of eye(s) and body
+      playerBody.x = (that.game.world.width/2) - 25;
+      playerBody.y = (that.game.world.height/2) - 20;
+      deadPlayerEye.x = -100;
+      deadPlayerEye.y = -100;
+
+      openPlayerEye.revive();
+
+      currentPlayerEye = openPlayerEye;;
+
+      currentPlayerEye.x = playerBody.x;
+      currentPlayerEye.y = playerBody.y;
+      currentPlayerEye.rotation = that.game.physics.arcade.angleToPointer(currentPlayerEye);
+
+      alive = true;
+    };
+
+    var _killPlayer = function() {
+      //Replace the eye with the 'X'
+      currentPlayerEye.kill();
+      currentPlayerEye = deadPlayerEye;
+
+      currentPlayerEye.x = playerBody.x;
+      currentPlayerEye.y = playerBody.y;
+      playerBody.body.gravity.y = 300;
+
+      alive = false;
+    };
+
+    var _update = function() {
+      currentPlayerEye.x = playerBody.x;
+      currentPlayerEye.y = playerBody.y;
+      if(alive) {
+        currentPlayerEye.rotation = that.game.physics.arcade.angleToPointer(currentPlayerEye);
+    }
+    };
+
+    return {
+      playerBody: playerBody,
+      revivePlayer: _revivePlayer,
+      killPlayer: _killPlayer,
+      update: _update
+    };
   },
+
+
 
   /**
    * New idea in "reuse"
@@ -211,6 +250,7 @@ EG3.Level.prototype = {
     var that = this;
     var startTime = 0;
     var endTime = 0;
+    var timeHack = 0;//Little hack so the clock doesn't update so much
 
     var clockDisplay = this.game.add.text(
       20,
@@ -228,6 +268,10 @@ EG3.Level.prototype = {
         endTime = startTime + duration;
       },
       update: function() {
+        if(timeHack++ < 5) {
+          return;
+        }
+        timeHack = 0;
         var now = that.game.time.now;
         if(now >= endTime) {
           clockDisplay.text = "00.00";

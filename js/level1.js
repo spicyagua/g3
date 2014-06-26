@@ -4,35 +4,49 @@ EG3.Level1 = function() {
 
   console.log("Level1 function invoked");
   this.numBalls = 14;
+  this.ballSpeed = 50;
   this.TOTAL_TIME = 1000*20;
 
   this.firstUpdate = true;
 
   /*
-  this.playerBody
-  this.deadPlayerEye
-  this.currentPlayerEye
-  this.openPlayerEye
-  this.againButtonGroup
-  this.againButton
-  this.moveTween
-  this.createdOnce
-  this.playerDead
-  this.greenBalls
-
   this.countownClock;
-
+  this.playerWrapper
+  this.greenBallGroup
   */
 
+  /**
+   *
+   */
+  this.create = function() {
+    console.log("Level1.create");
+
+    if(!this.createdOnce) {
+      this.onetimeCreate();
+    }
+    else {
+      this.xreset();
+    }
+  };
+
+
   this.onetimeCreate = function() {
+    console.log("Level1.onetimeCreate");
 
     //Add background
     this.game.add.sprite(0,0,"bg");
 
+    this.greenBallGroup = this.createBallGroup(
+      "greenBall",
+      this.numBalls,
+      this.ballSpeed);
 
-    this.createBalls();
-    this.ballsToTheWalls();
+    this.greenBallGroup.ballsToTheWalls();
 
+//    this.createBalls();
+//    this.ballsToTheWalls();
+    this.playerWrapper = this.createPlayerWrapper();
+/*
     this.playerBody = this.game.add.sprite(
       (this.game.world.width/2) - 25,
       (this.game.world.height/2) - 20, 'playerBody');
@@ -52,7 +66,7 @@ EG3.Level1 = function() {
     this.currentPlayerEye.x = this.playerBody.x;
     this.currentPlayerEye.y = this.playerBody.y;
     this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
-
+*/
     this.againButtonGroup = this.game.add.group();
     this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
   //    this.againButton;
@@ -103,6 +117,14 @@ EG3.Level1 = function() {
     this.createdOnce = true;
   };
 
+
+  /**
+   * Callback when "again" is clicked
+   */
+  this.againClicked = function() {
+    this.xreset();
+  };
+
   /**
    * I didn't check if the name conflicts - should do that sometime
    */
@@ -113,8 +135,13 @@ EG3.Level1 = function() {
 
     this.firstUpdate = true;
 
+    this.playerWrapper.revivePlayer();
+
+    this.greenBallGroup.ballsToTheWalls();
+
+    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
+/*
     this.playerBody.checkWorldBounds = false;
-    this.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
     this.playerBody.body.gravity.y = 0;
     this.playerBody.body.velocity.x = 0;
     this.playerBody.body.velocity.y = 0;
@@ -133,7 +160,7 @@ EG3.Level1 = function() {
     this.currentPlayerEye.x = this.playerBody.x;
     this.currentPlayerEye.y = this.playerBody.y;
     this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
-
+*/
     //re-add tap handler
     this.game.input.onTap.add(this.tapHandler, this);
 
@@ -143,7 +170,7 @@ EG3.Level1 = function() {
 
     this.countownClock.reset();
 
-    this.ballsToTheWalls();
+//    this.ballsToTheWalls();
 
     this.playerDead = false;
   };
@@ -191,7 +218,7 @@ EG3.Level1 = function() {
       this.countownClock.startTimming();
     }
     else {
-      if(this.countownClock.update()) {
+      if(!this.playerDead && this.countownClock.update()) {
         console.log("Need a victory method and plan of action");
         EG3.app.advanceLevel();
         //change state
@@ -202,29 +229,127 @@ EG3.Level1 = function() {
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
-    this.game.physics.arcade.collide(this.greenBalls);
-    this.game.physics.arcade.collide(this.playerBody,
-      this.greenBalls,
+    this.game.physics.arcade.collide(this.greenBallGroup.group);
+    this.game.physics.arcade.collide(this.playerWrapper.playerBody,
+      this.greenBallGroup.group,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
-    this.currentPlayerEye.x = this.playerBody.x;
-    this.currentPlayerEye.y = this.playerBody.y;
+    this.playerWrapper.update();
+//    this.currentPlayerEye.x = this.playerBody.x;
+//    this.currentPlayerEye.y = this.playerBody.y;
 
     //Kind-of a hack (I should add more "behavior" to the player
     //but prevents the dead "X" eye from following the pointer
     //(on desktop machines)
+/*
     if(!this.playerDead) {
       this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
     }
+*/
   };
+
+  /**
+   * Callback when a dead sprite finally falls off the world
+   */
+  this.spriteLeftWorld = function() {
+    console.log("Sprite left world");
+  };
+
+  /**
+   * Callback when user taps on screen
+   */
+  this.tapHandler = function() {
+    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
+    if(this.moveTween.isRunning) {
+      console.log("Tween running.  Stop it");
+      this.moveTween.stop();
+    }
+    else {
+      console.log("Tween not running.");
+    }
+
+    //Create the tween to move the player
+    this.moveTween = this.game.add.tween(this.playerWrapper.playerBody);
+
+    //so the player moves at a constant *speed*, the tween should have
+    //a duration proportional to the distance it will travel
+    var duration = this.playerSpeedFactor *
+      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerWrapper.playerBody, this.game.input.activePointer));
+
+    this.moveTween.to(
+      {
+        x: this.game.input.activePointer.x,
+        y: this.game.input.activePointer.y
+      },
+      duration,
+      Phaser.Easing.Quadratic.In
+    );
+    console.log("Calling start on tween");
+    this.moveTween.start();
+  };
+
+
+
+
+  /**
+   *
+   */
+  this.playerBallCollisionProcess = function(playerBody, ball) {
+    console.log("Player/ball collision - process callback");
+
+    if(this.playerDead) {
+      //It is cute to still have the player bounce off of things as it decends
+      //into the abyss
+      return true;
+    }
+
+    //Time
+/*
+    var diff = this.game.time.now - this.startTime;
+    var prevHigh = jQuery.cookie("high_score");
+    if(!prevHigh) {
+      prevHigh = 0;
+    }
+    console.log("Compare previous high score " + prevHigh + " to " + diff);
+    if(prevHigh < diff) {
+      this.newHighScore(diff);
+    }
+*/
+    this.playerDead = true;
+
+    //Kill some working-game things
+    this.moveTween.stop();
+    this.game.input.onTap.remove(this.tapHandler, this);
+
+    this.playerWrapper.killPlayer();
+/*
+    //Replace the eye with the 'X'
+    this.currentPlayerEye.kill();
+    this.currentPlayerEye = this.deadPlayerEye;
+
+    this.currentPlayerEye.x = this.playerBody.x;
+    this.currentPlayerEye.y = this.playerBody.y;
+    this.playerBody.body.gravity.y = 300;
+*/
+    //Tell the player sprite to care
+    //if it leaves the world (normally expensive
+    //so I've read) then get a callback when it finally leaves
+    this.playerWrapper.playerBody.checkWorldBounds = true;
+    this.playerWrapper.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
+
+    //TODO remove previous button listener, or figure out how to show/hide the button so we can create once
+    console.log("Add the \"again\" button");
+    //TODO I think I may have too many references dangling.  Need to be more smart w/ the group
+    this.againButtonGroup.visible = true;
+
+    return true;
+  };
+
 
   this.shutDown = function() {
     console.log("Shutting down level1");
   };
-
-
-
 };
 
 EG3.Level1.constructor = EG3.Level1;
