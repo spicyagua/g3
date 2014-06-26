@@ -89,7 +89,7 @@ EG3.Level.prototype = {
       }
       );
 
-    //Existing high score
+     //Existing high score
     var prevHigh = jQuery.cookie('high_score');
     if(!prevHigh) {
       prevHigh = "0";
