@@ -5,7 +5,7 @@ EG3.Level1 = function() {
   console.log("Level1 function invoked");
   this.numBalls = 4;
   this.ballSpeed = 50;
-  this.totalTime = 1000*2;
+  this.totalTime = 1000*10;
   this.playerSpeedFactor = 5;//bigger means slower
   this.firstUpdate = true;
 

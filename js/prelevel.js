@@ -1,9 +1,12 @@
 var EG3 = EG3 || {};
 
+
+
 EG3.Prelevel = function() {
+  console.log("Prelevel constructor");
   this.createBg = false;
   this.nextLevel = null;
-}
+};
 
 EG3.Prelevel.prototype = {
 
@@ -55,3 +58,5 @@ EG3.Prelevel.prototype = {
     this.game.state.start(EG3.app.getCurrentLevelName());
   }
 };
+
+

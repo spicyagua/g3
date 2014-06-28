@@ -89,10 +89,9 @@ EG3.Level.prototype = {
       s.name = imageName + i;
       this.game.physics.enable(s, Phaser.Physics.ARCADE);
       s.body.collideWorldBounds = true;
-      s.body.bounce.setTo(0.8, 0.8);
+      s.body.bounce.setTo(1, 1);
       s.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
-      s.body.bounce.x = 1;
-      s.body.bounce.y = 1;
+
     }
 
     /**
@@ -220,7 +219,7 @@ EG3.Level.prototype = {
    * Gets passed the total time (in millis)
    * For now assumes "seconds"
    *
-   * A mix of display and logic but who cares
+   * A mix of display and logic, but who cares
    */
   createCountDownTimer: function(duration) {
 
@@ -265,7 +264,8 @@ EG3.Level.prototype = {
 
   /**
    * Maybe it is my lack-of JS knowledge, but I needed a function
-   * as a placeholder to apply a second optional function.
+   * as a placeholder to apply a second optional function for collision
+   * callbacks.  Seems someone put things in the wrong order.
    *
    * This is a no-op
    */
