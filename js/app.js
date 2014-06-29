@@ -7,10 +7,33 @@ EG3.app = (function() {
   var game = null;
   var currentLevelPtr = 0;
 
+
+  // This should be fetched by XHR in the future, but this is fine for now.
   var levels = [
-    {name: "level1", jsType: "Level1"},
-    {name: "level2", jsType: "Level2"}
+    {
+      name: "level1", 
+      jsType: "BouncyBalls",
+      description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
+      meta: {
+        numBalls: 6,
+        ballSpeed: 50,
+        totalTime: 1000*10,
+        playerSpeedFactor: 5,
+      }
+    },
+    {
+      name: "level2", 
+      jsType: "BouncyBalls",
+      description: "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds",
+      meta: {
+        numBalls: 10,
+        ballSpeed: 60,
+        totalTime: 1000*20,
+        playerSpeedFactor: 5,
+      }      
+    }
   ];
+
 
   var _main = function() {
 
@@ -22,7 +45,7 @@ EG3.app = (function() {
       currentLevelPtr = prevLevel;
     }
 
-    //TODO Remove this hack
+    //TODO Remove this hack once I resolve cookies
     currentLevelPtr = 0;
 
     game = new Phaser.Game(relWidth, relHeight, Phaser.AUTO, 'G3');
@@ -31,12 +54,26 @@ EG3.app = (function() {
     game.state.add('bootup', EG3.Bootup);
     game.state.add('preload', EG3.Preload);
     game.state.add('options', EG3.Options);
-    game.state.add('level1', EG3.Level1);
-    game.state.add('level2', EG3.Level2);
-
     game.state.add('prelevel', new EG3.Prelevel());
+ 
+    
+    for(var i = 0; i<levels.length; i++) {
+      game.state.add(levels[i].name, createLevel(levels[i].jsType, levels[i].meta))
+    }  
 
-    game.state.start('bootup');
+    game.state.start('bootup'); 
+
+  };
+  
+  //I can't figure out how to dynamically invoke
+  //constructors.  There must be *some* way, or 
+  //perhaps I shouldn't use constructors.
+  var createLevel = function(jtype, args) {
+    switch(jtype) {
+      case "BouncyBalls":
+        return new EG3.BouncyBalls(args);
+        break;
+    }
   };
 
 
@@ -49,7 +86,10 @@ EG3.app = (function() {
       jQuery.cookie("current_level", currentLevelPtr, { expires: 28} );
     },
     getCurrentLevelName: function() {return levels[currentLevelPtr].name;},
-    getCurrentLevelDesc: function() {console.log("Pointer: " + currentLevelPtr);return EG3[levels[currentLevelPtr].jsType]["description"];}
+    getCurrentLevelDesc: function() {
+      console.log("Pointer: " + currentLevelPtr);
+      return levels[currentLevelPtr].description;
+    }
   };
 }());
 

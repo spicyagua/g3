@@ -1,12 +1,18 @@
 var EG3 = EG3 || {};
 
-EG3.Level2 = function() {
+EG3.BouncyBalls = function(args) {
 
-  console.log("Level2 function invoked");
-  this.numBalls = 14;
-  this.ballSpeed = 50;
-  this.totalTime = 1000*20;
-  this.playerSpeedFactor = 5;//bigger means slower
+  console.log("Level1 function invoked");
+  console.log("Args: " + args.numBalls);
+  
+  //TODO - there must be some nifty jQuery or JS way to do
+  //this.  I may have to have a "local" thing to copy into 
+  //with defaults
+  this.numBalls = args.numBalls?args.numBalls:4;
+  this.ballSpeed = args.ballSpeed?args.ballSpeed:50;
+  this.totalTime = args.totalTime?args.totalTime:10000;
+  this.playerSpeedFactor = args.playerSpeedFactor?args.playerSpeedFactor:5;//bigger means slower
+  
   this.firstUpdate = true;
 
   /*
@@ -21,7 +27,7 @@ EG3.Level2 = function() {
    *
    */
   this.onetimeCreate = function() {
-    console.log("Level2.onetimeCreate");
+    console.log("BouncyBalls.onetimeCreate");
 
     //Add background
     this.game.add.sprite(0,0,"bg");
@@ -34,13 +40,17 @@ EG3.Level2 = function() {
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
 
+/* REFACTOR
     //Tap handler to move the player
     this.game.input.onTap.add(this.tapHandler, this);
 
     //This is just so I don't have to have a bunch of
     //null checks later.  The tween isn't used for anything
     this.moveTween = this.game.add.tween(this.playerBody);
-
+*/
+    //REFACTOR - new
+    this.enableTapFollow(this.playerWrapper.playerBody);
+    
     this.countownClock = this.createCountDownTimer(this.totalTime);
   };
 
@@ -59,8 +69,12 @@ EG3.Level2 = function() {
 
     this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
+/* REFACTOR
     //re-add tap handler
     this.game.input.onTap.add(this.tapHandler, this);
+*/    
+    //REFACTOR - new
+    this.enableTapFollow(this.playerWrapper.playerBody);
 
     this.countownClock.reset();
 
@@ -86,8 +100,8 @@ EG3.Level2 = function() {
       if(!this.playerDead && this.countownClock.update()) {
         console.log("Need a victory method and plan of action");
         EG3.app.advanceLevel();
-        //change state
-        //return
+        this.game.state.start('prelevel');
+        return;
       }
 
     }
@@ -110,41 +124,6 @@ EG3.Level2 = function() {
     console.log("Sprite left world");
   };
 
-  /**
-   * Callback when user taps on screen
-   */
-  this.tapHandler = function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
-    }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.playerWrapper.playerBody);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.playerSpeedFactor *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerWrapper.playerBody, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
-  };
-
-
-
 
   /**
    *
@@ -159,11 +138,14 @@ EG3.Level2 = function() {
     }
 
     this.playerDead = true;
-
+    
+/*
     //Kill some working-game things
     this.moveTween.stop();
     this.game.input.onTap.remove(this.tapHandler, this);
-
+*/
+    //REFACTOR - new 
+    this.disableTapFollow();
     this.playerWrapper.killPlayer();
 
     //Tell the player sprite to care
@@ -183,10 +165,11 @@ EG3.Level2 = function() {
   };
 };
 
-EG3.Level2.constructor = EG3.Level2;
+EG3.BouncyBalls.constructor = EG3.BouncyBalls;
 
-EG3.Level2.description = "This is level 2";
+//TODO Depricated
+EG3.BouncyBalls.description = "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds";
 
-EG3.Level2.prototype = new EG3.Level();
+EG3.BouncyBalls.prototype = new EG3.Level();
 
 

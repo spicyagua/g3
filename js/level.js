@@ -32,6 +32,10 @@ EG3.Level.prototype = {
 
     }
     else {
+      if(this.playerFollowsTap) {
+        //re-add tap handler
+        this.game.input.onTap.add(this.tapFollowHandler, this);
+      }
       this.reset();
     }
   },
@@ -130,6 +134,56 @@ EG3.Level.prototype = {
     };
 
   },
+  
+  enableTapFollow: function(bodyToMove) {
+    this.playerFollowsTap = true;
+    this.bodyToFollow = bodyToMove;
+    //Tap handler to move the player
+    this.game.input.onTap.add(this.tapFollowHandler, this); 
+      
+    //This is just so I don't have to have a bunch of
+    //null checks later.  The tween isn't used for anything
+    this.moveTween = this.game.add.tween(bodyToMove);     
+  },
+  
+  disableTapFollow: function() {
+    //Kill some working-game things
+    this.moveTween.stop();
+    this.game.input.onTap.remove(this.tapFollowHandler, this);    
+  },
+  
+    /**
+   * Callback when user taps on screen to move sprite
+   */
+  tapFollowHandler: function() {
+    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
+    if(this.moveTween.isRunning) {
+      console.log("Tween running.  Stop it");
+      this.moveTween.stop();
+    }
+    else {
+      console.log("Tween not running.");
+    }
+
+    //Create the tween to move the player
+    this.moveTween = this.game.add.tween(this.bodyToFollow);
+
+    //so the player moves at a constant *speed*, the tween should have
+    //a duration proportional to the distance it will travel
+    var duration = this.playerSpeedFactor *
+      Math.floor(this.game.physics.arcade.distanceToPointer(this.bodyToFollow, this.game.input.activePointer));
+
+    this.moveTween.to(
+      {
+        x: this.game.input.activePointer.x,
+        y: this.game.input.activePointer.y
+      },
+      duration,
+      Phaser.Easing.Quadratic.In
+    );
+    console.log("Calling start on tween");
+    this.moveTween.start();
+  },
 
 
   /**
@@ -197,6 +251,8 @@ EG3.Level.prototype = {
     };
 
     var _update = function() {
+      //TODO there is some bug where the physics body is already updated, and the eye looks funny 
+      //falling.  Not really noticable on regular play, but something to be worked out.
       currentPlayerEye.x = playerBody.x;
       currentPlayerEye.y = playerBody.y;
       if(alive) {
