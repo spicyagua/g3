@@ -40,15 +40,7 @@ EG3.BouncyBalls = function(args) {
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
 
-/* REFACTOR
-    //Tap handler to move the player
-    this.game.input.onTap.add(this.tapHandler, this);
-
-    //This is just so I don't have to have a bunch of
-    //null checks later.  The tween isn't used for anything
-    this.moveTween = this.game.add.tween(this.playerBody);
-*/
-    //REFACTOR - new
+    //Ask prototype to enable tab/follow motion of player
     this.enableTapFollow(this.playerWrapper.playerBody);
     
     this.countownClock = this.createCountDownTimer(this.totalTime);
@@ -69,11 +61,7 @@ EG3.BouncyBalls = function(args) {
 
     this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
-/* REFACTOR
-    //re-add tap handler
-    this.game.input.onTap.add(this.tapHandler, this);
-*/    
-    //REFACTOR - new
+    //re-enable the tap/follow on the sprite
     this.enableTapFollow(this.playerWrapper.playerBody);
 
     this.countownClock.reset();
@@ -139,12 +127,7 @@ EG3.BouncyBalls = function(args) {
 
     this.playerDead = true;
     
-/*
-    //Kill some working-game things
-    this.moveTween.stop();
-    this.game.input.onTap.remove(this.tapHandler, this);
-*/
-    //REFACTOR - new 
+    //nuke tap following player
     this.disableTapFollow();
     this.playerWrapper.killPlayer();
 

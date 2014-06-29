@@ -11,6 +11,8 @@ EG3.Level = function() {
 
 EG3.Level.prototype = {
 
+  //====================== lifecycle ===========================
+  
   /**
    * Called by Phaser.  In turn calls either "reset" to prepare for the
    * next attempt at the level or "oneTimeCreate" initially
@@ -66,6 +68,62 @@ EG3.Level.prototype = {
     jQuery.cookie('high_score', diff, { expires: 28} );
     this.highScoreDisplay.text = this.timeToDisplayTime(diff);
   },
+  
+  //====================== Optional behaviors ===========================  
+
+  
+  enableTapFollow: function(bodyToMove) {
+    this.playerFollowsTap = true;
+    this.bodyToFollow = bodyToMove;
+    //Tap handler to move the player
+    this.game.input.onTap.add(this.tapFollowHandler, this); 
+      
+    //This is just so I don't have to have a bunch of
+    //null checks later.  The tween isn't used for anything
+    this.moveTween = this.game.add.tween(bodyToMove);     
+  },
+  
+  disableTapFollow: function() {
+    //Kill some working-game things
+    this.moveTween.stop();
+    this.game.input.onTap.remove(this.tapFollowHandler, this);    
+  },
+  
+    /**
+   * Callback when user taps on screen to move sprite
+   */
+  tapFollowHandler: function() {
+    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
+    if(this.moveTween.isRunning) {
+      console.log("Tween running.  Stop it");
+      this.moveTween.stop();
+    }
+    else {
+      console.log("Tween not running.");
+    }
+
+    //Create the tween to move the player
+    this.moveTween = this.game.add.tween(this.bodyToFollow);
+
+    //so the player moves at a constant *speed*, the tween should have
+    //a duration proportional to the distance it will travel
+    var duration = this.playerSpeedFactor *
+      Math.floor(this.game.physics.arcade.distanceToPointer(this.bodyToFollow, this.game.input.activePointer));
+
+    this.moveTween.to(
+      {
+        x: this.game.input.activePointer.x,
+        y: this.game.input.activePointer.y
+      },
+      duration,
+      Phaser.Easing.Quadratic.In
+    );
+    console.log("Calling start on tween");
+    this.moveTween.start();
+  },
+
+  //====================== Composite factories ===========================
+
 
   /**
    * Creates a group of balls (duh).  Currently, they bounce around but
@@ -133,56 +191,6 @@ EG3.Level.prototype = {
       ballsToTheWalls: _bttw
     };
 
-  },
-  
-  enableTapFollow: function(bodyToMove) {
-    this.playerFollowsTap = true;
-    this.bodyToFollow = bodyToMove;
-    //Tap handler to move the player
-    this.game.input.onTap.add(this.tapFollowHandler, this); 
-      
-    //This is just so I don't have to have a bunch of
-    //null checks later.  The tween isn't used for anything
-    this.moveTween = this.game.add.tween(bodyToMove);     
-  },
-  
-  disableTapFollow: function() {
-    //Kill some working-game things
-    this.moveTween.stop();
-    this.game.input.onTap.remove(this.tapFollowHandler, this);    
-  },
-  
-    /**
-   * Callback when user taps on screen to move sprite
-   */
-  tapFollowHandler: function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
-    }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.bodyToFollow);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.playerSpeedFactor *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.bodyToFollow, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
   },
 
 
@@ -317,6 +325,8 @@ EG3.Level.prototype = {
       }
     };
   },
+  
+  //====================== Utilities ===========================
 
   /**
    * Maybe it is my lack-of JS knowledge, but I needed a function

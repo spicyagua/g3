@@ -3,8 +3,8 @@ var EG3 = EG3 || {};
 EG3.BoundyRG = function() {
 
   console.log("BoundyRG function invoked");
-  this.numBalls = 14;
-  this.ballSpeed = 50;
+  this.numBalls = 8;
+  this.ballSpeed = 40;
   this.totalTime = 1000*20;
   this.playerSpeedFactor = 5;//bigger means slower
   this.firstUpdate = true;
@@ -34,12 +34,7 @@ EG3.BoundyRG = function() {
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
 
-    //Tap handler to move the player
-    this.game.input.onTap.add(this.tapHandler, this);
-
-    //This is just so I don't have to have a bunch of
-    //null checks later.  The tween isn't used for anything
-    this.moveTween = this.game.add.tween(this.playerBody);
+    this.enableTapFollow(this.playerWrapper.playerBody);
 
     this.countownClock = this.createCountDownTimer(this.totalTime);
   };
@@ -59,8 +54,7 @@ EG3.BoundyRG = function() {
 
     this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
-    //re-add tap handler
-    this.game.input.onTap.add(this.tapHandler, this);
+    this.enableTapFollow(this.playerWrapper.playerBody);
 
     this.countownClock.reset();
 
@@ -110,41 +104,6 @@ EG3.BoundyRG = function() {
     console.log("Sprite left world");
   };
 
-  /**
-   * Callback when user taps on screen
-   */
-  this.tapHandler = function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
-    }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.playerWrapper.playerBody);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.playerSpeedFactor *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.playerWrapper.playerBody, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
-  };
-
-
-
 
   /**
    *
@@ -160,9 +119,7 @@ EG3.BoundyRG = function() {
 
     this.playerDead = true;
 
-    //Kill some working-game things
-    this.moveTween.stop();
-    this.game.input.onTap.remove(this.tapHandler, this);
+    this.disableTapFollow();
 
     this.playerWrapper.killPlayer();
 
