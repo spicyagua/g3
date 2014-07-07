@@ -17,19 +17,21 @@ EG3.app = (function() {
       meta: {
         numBalls: 6,
         ballSpeed: 50,
-        totalTime: 1000*10,
+        totalTime: 1000*1,
         playerSpeedFactor: 5,//Bigger = slower
       }
     },
     {
       name: "level2",
-      jsType: "BouncyBalls",
-      description: "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds",
+      jsType: "GBBacon",
+      description: "Tap to move Sprite.  Avoid the green tomatoes while trying to eat the bacon",
       meta: {
-        numBalls: 10,
-        ballSpeed: 60,
-        totalTime: 1000*20,
+        numBalls: 4,
+        ballSpeed: 10,
         playerSpeedFactor: 5,
+        baconDelay: 2,//seconds
+        baconFadeMillis: 2000,
+        baconSpeed: 100
       }
     }
   ];
@@ -73,6 +75,9 @@ EG3.app = (function() {
       case "BouncyBalls":
         return new EG3.BouncyBalls(args);
         break;
+      case "GBBacon":
+        return new EG3.GBBacon(args);
+        break;
     }
   };
 
@@ -83,6 +88,7 @@ EG3.app = (function() {
     main: _main,
     advanceLevel: function() {
       currentLevelPtr++;
+      console.log("Advanced pointer to: " + currentLevelPtr);
       jQuery.cookie("current_level", currentLevelPtr, { expires: 28} );
     },
     getCurrentLevelName: function() {return levels[currentLevelPtr].name;},

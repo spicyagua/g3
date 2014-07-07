@@ -187,11 +187,85 @@ EG3.Level.prototype = {
       }, that);
     };
 
-    return {
-      group: _ballGroup,
-      ballsToTheWalls: _bttw
+    var _stopMotion = function() {
+//      _ballGroup.callAll("body.velocity.setTo", null, 0, 0);
+      _ballGroup.forEach(function(ball) {
+        ball.body.velocity.setTo(0,0);
+      }, this);
     };
 
+    return {
+      group: _ballGroup,
+      ballsToTheWalls: _bttw,
+      stopMoving: _stopMotion
+    };
+
+  },
+
+  createBaconWrapper: function(speed) {
+    var that = this;
+
+    var img = this.game.cache.getImage("bacon");
+    var _imgWidth = img.width;
+    var _imgHeight = img.height;
+    img = null;
+
+    var baconBody = this.game.add.sprite(-100,-100, 'bacon');
+    this.game.physics.enable(baconBody, Phaser.Physics.ARCADE);
+    baconBody.anchor.setTo(0.5, 0.5);
+    baconBody.body.collideWorldBounds = true;
+    baconBody.body.bounce.setTo(1, 1);
+    baconBody.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
+    baconBody.kill();
+
+
+    var _reviveBacon = function() {
+      baconBody.revive();
+      baconBody.x = -100;
+      baconBody.y = -100;
+      baconBody.angle = 90;
+    };
+
+    var _killBacon = function() {
+      baconBody.kill();
+      if(this.eatTween) {
+        this.eatTween.stop();
+      }
+    };
+
+    var _eatBacon = function(eaterSprite) {//TODO Hardcode eating time
+      console.log("Eat bacon!");
+//      that.add.tween(this.baconBody.scale).to({x:0.1, y:0.1},3000, Phaser.Easing.Linear.NONE, true);
+      that.add.tween(baconBody.angle).to(180,2000, Phaser.Easing.Linear.NONE, true);
+    };
+
+    /**
+     * Automagically tried to be away from point given
+     */
+    var _showBacon = function(x, y, fadeInMillis) {
+      baconBody.revive();
+      upperHalf = y<(that.game.world.height/2);
+      leftHalf = x<(that.game.world.width/2);
+
+      baconBody.x = leftHalf?that.game.world.width-_imgWidth:_imgWidth;
+      baconBody.y = upperHalf?that.game.world.width-_imgHeight:_imgHeight;
+      baconBody.alpha = 0;
+
+      this.eatTween = that.game.add.tween(baconBody).to({alpha:1}, fadeInMillis, Phaser.Easing.Linear.NONE, true);
+
+    };
+
+
+    return {
+      baconBody: baconBody,
+      reviveBacon: _reviveBacon,
+      killBacon: _killBacon,
+      showBacon: _showBacon,
+      eatBacon: _eatBacon,
+      stillEating: function() {
+        return this.eatTween.isRunning;
+      }
+    };
   },
 
 
