@@ -31,7 +31,7 @@
      inkscape:cx="0.99223188"
      inkscape:cy="21.789959"
      inkscape:document-units="px"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:showpageshadow="false"
      inkscape:window-width="1215"
@@ -61,13 +61,16 @@
        style="fill:#f31b76;fill-opacity:1;stroke:#faa9cb;stroke-width:0.97799248;stroke-opacity:1"
        d="m 24.964466,1012.8443 c -12.787131,0 -23.2833922,17.1543 -24.51100367,39.022 l 49.02200767,0 c -1.227453,-21.8677 -11.723755,-39.022 -24.511004,-39.022 z"
        id="path3280"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/biscott/git/g3/assets/bodyBig.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="mouth"
-     style="display:inline">
+     style="display:none">
     <path
        style="fill:#000000;fill-opacity:1;stroke:none"
        d="m 31.191438,31.205327 c -0.805697,0.735297 -3.02411,3.019678 -6.573398,2.994645 -3.549289,-0.02503 -5.578938,-2.249401 -6.27971,-3.085301 -1.55445,-1.854192 2.493781,1.052159 6.043069,1.077192 3.549288,0.02503 9.018801,-3.002287 6.810039,-0.986536 z"
@@ -127,7 +130,7 @@
      inkscape:groupmode="layer"
      id="layer5"
      inkscape:label="blankEye"
-     style="display:inline">
+     style="display:none">
     <path
        sodipodi:type="arc"
        style="fill:#ffffff;fill-opacity:0.94117647;stroke:#000000;stroke-opacity:1"
@@ -143,7 +146,7 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="pupil"
-     style="display:inline">
+     style="display:none">
     <path
        sodipodi:type="arc"
        style="fill:#000000;fill-opacity:0.94117647;stroke:#000000;stroke-opacity:1;display:inline"

@@ -13,7 +13,7 @@
    height="1052.3622047"
    id="svg3830"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="button.svg"
    inkscape:export-filename="/var/www/g3/assets/playButton.png"
    inkscape:export-xdpi="22.539915"
@@ -33,9 +33,9 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1528"
-     inkscape:window-height="876"
-     inkscape:window-x="72"
+     inkscape:window-width="1215"
+     inkscape:window-height="1000"
+     inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1" />
   <metadata
@@ -61,17 +61,26 @@
        height="298.91159"
        x="-819.45581"
        y="-274.23648"
-       ry="126.46259" />
+       ry="126.46259"
+       inkscape:export-filename="/home/biscott/git/g3/wrongPlace/startButton.png"
+       inkscape:export-xdpi="22.581926"
+       inkscape:export-ydpi="22.581926" />
     <path
        style="fill:#f1f1f1;fill-opacity:1;stroke:none"
        d="m -819.46875,-125.38739 0,23.59375 c 0,70.06028 56.40847,126.46875 126.46875,126.46875 l 346,0 c 70.06028,0 126.46875,-56.40847 126.46875,-126.46875 l 0,-23.59375 -598.9375,0 z"
        id="rect3838"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/biscott/git/g3/wrongPlace/startButton.png"
+       inkscape:export-xdpi="22.581926"
+       inkscape:export-ydpi="22.581926" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4388"
        style="font-size:144px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:4.48000002px;word-spacing:2.3900001px;fill:#000000;fill-opacity:1;stroke:none;font-family:Andika;-inkscape-font-specification:Andika"
-       transform="translate(76,-14)"><flowRegion
+       transform="translate(50.285714,-11.142857)"
+       inkscape:export-filename="/home/biscott/git/g3/wrongPlace/startButton.png"
+       inkscape:export-xdpi="22.581926"
+       inkscape:export-ydpi="22.581926"><flowRegion
          id="flowRegion4390"><rect
            id="rect4392"
            width="517.14288"
@@ -79,5 +88,5 @@
            x="-745.71429"
            y="-216.20924"
            style="font-size:144px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Andika;-inkscape-font-specification:Andika" /></flowRegion><flowPara
-         id="flowPara4394">Play</flowPara></flowRoot>  </g>
+         id="flowPara4394">Start</flowPara></flowRoot>  </g>
 </svg>
