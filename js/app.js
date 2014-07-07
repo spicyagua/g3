@@ -11,18 +11,18 @@ EG3.app = (function() {
   // This should be fetched by XHR in the future, but this is fine for now.
   var levels = [
     {
-      name: "level1", 
+      name: "level1",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
       meta: {
         numBalls: 6,
         ballSpeed: 50,
         totalTime: 1000*10,
-        playerSpeedFactor: 5,
+        playerSpeedFactor: 5,//Bigger = slower
       }
     },
     {
-      name: "level2", 
+      name: "level2",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds",
       meta: {
@@ -30,7 +30,7 @@ EG3.app = (function() {
         ballSpeed: 60,
         totalTime: 1000*20,
         playerSpeedFactor: 5,
-      }      
+      }
     }
   ];
 
@@ -55,18 +55,18 @@ EG3.app = (function() {
     game.state.add('preload', EG3.Preload);
     game.state.add('options', EG3.Options);
     game.state.add('prelevel', new EG3.Prelevel());
- 
-    
+
+
     for(var i = 0; i<levels.length; i++) {
       game.state.add(levels[i].name, createLevel(levels[i].jsType, levels[i].meta))
-    }  
+    }
 
-    game.state.start('bootup'); 
+    game.state.start('bootup');
 
   };
-  
+
   //I can't figure out how to dynamically invoke
-  //constructors.  There must be *some* way, or 
+  //constructors.  There must be *some* way, or
   //perhaps I shouldn't use constructors.
   var createLevel = function(jtype, args) {
     switch(jtype) {

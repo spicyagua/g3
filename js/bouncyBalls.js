@@ -3,25 +3,9 @@ var EG3 = EG3 || {};
 EG3.BouncyBalls = function(args) {
 
   console.log("Level1 function invoked");
-  console.log("Args: " + args.numBalls);
-  
-  //TODO - there must be some nifty jQuery or JS way to do
-  //this.  I may have to have a "local" thing to copy into 
-  //with defaults
-  this.numBalls = args.numBalls?args.numBalls:4;
-  this.ballSpeed = args.ballSpeed?args.ballSpeed:50;
-  this.totalTime = args.totalTime?args.totalTime:10000;
-  this.playerSpeedFactor = args.playerSpeedFactor?args.playerSpeedFactor:5;//bigger means slower
-  
+  this.settings = args;
+
   this.firstUpdate = true;
-
-  /*
-  this.countownClock;
-  this.playerWrapper
-  this.greenBallGroup
-  */
-
-
 
   /**
    *
@@ -34,16 +18,16 @@ EG3.BouncyBalls = function(args) {
 
     this.greenBallGroup = this.createBallGroup(
       "greenBall",
-      this.numBalls,
-      this.ballSpeed);
+      this.settings.numBalls,
+      this.settings.ballSpeed);
 
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
 
     //Ask prototype to enable tab/follow motion of player
     this.enableTapFollow(this.playerWrapper.playerBody);
-    
-    this.countownClock = this.createCountDownTimer(this.totalTime);
+
+    this.countownClock = this.createCountDownTimer(this.settings.totalTime);
   };
 
 
@@ -62,7 +46,7 @@ EG3.BouncyBalls = function(args) {
     this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
     //re-enable the tap/follow on the sprite
-    this.enableTapFollow(this.playerWrapper.playerBody);
+    this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
 
     this.countownClock.reset();
 
@@ -126,7 +110,7 @@ EG3.BouncyBalls = function(args) {
     }
 
     this.playerDead = true;
-    
+
     //nuke tap following player
     this.disableTapFollow();
     this.playerWrapper.killPlayer();
@@ -149,9 +133,6 @@ EG3.BouncyBalls = function(args) {
 };
 
 EG3.BouncyBalls.constructor = EG3.BouncyBalls;
-
-//TODO Depricated
-EG3.BouncyBalls.description = "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds";
 
 EG3.BouncyBalls.prototype = new EG3.Level();
 
