@@ -8,7 +8,7 @@ EG3.BouncyBalls = function(args) {
   this.firstUpdate = true;
 
   /**
-   *
+   * Part of the "level" contract
    */
   this.onetimeCreate = function() {
     console.log("BouncyBalls.onetimeCreate");
@@ -61,18 +61,26 @@ EG3.BouncyBalls = function(args) {
   };
 
   /**
+   * Part of the "level" contract
+   */
+  this.displayFailState = function() {
+  };
+
+  /**
    *
    */
-  this.update = function() {
+  this.updateImpl = function() {
     if(this.firstUpdate) {
       this.firstUpdate = false;
       this.countownClock.startTimming();
     }
     else {
       if(!this.playerDead && this.countownClock.update()) {
-        console.log("Need a victory method and plan of action");
-        EG3.app.advanceLevel();
-        this.game.state.start('prelevel');
+        this.levelCompleted();
+        return;
+//        console.log("Need a victory method and plan of action");
+//        EG3.app.advanceLevel();
+//        this.game.state.start('prelevel');
         return;
       }
 

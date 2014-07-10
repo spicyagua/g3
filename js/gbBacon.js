@@ -64,12 +64,12 @@ EG3.GBBacon = function(args) {
   /**
    *
    */
-  this.update = function() {
+  this.updateImpl = function() {
 
-    if(!this.playerDead && this.gotBacon && this.baconWrapper.stillEating()) {//TODO - need logic for when bacon is eaten to stop balls and add flag
+    if(!this.playerDead && this.gotBacon) {//TODO - need logic for when bacon is eaten to stop balls and add flag
       console.log("Need a victory method and plan of action");
-      EG3.app.advanceLevel();
-      this.game.state.start('prelevel');
+//      EG3.app.advanceLevel();
+//      this.game.state.start('prelevel');
       return;
     }
 
@@ -99,8 +99,10 @@ EG3.GBBacon = function(args) {
 
 
   this.playerBaconCollisionProcess = function() {
-    this.baconWrapper.eatBacon();
+    this.baconWrapper.killBacon();
     this.greenBallGroup.stopMoving();
+    this.playerWrapper.hidePlayer();
+    this.gotBacon = true;
   };
 
   /**

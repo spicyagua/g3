@@ -14,10 +14,11 @@ EG3.app = (function() {
       name: "level1",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
+      victoryMsg: "Sweet",
       meta: {
         numBalls: 6,
         ballSpeed: 50,
-        totalTime: 1000*1,
+        totalTime: 1000*10,
         playerSpeedFactor: 5,//Bigger = slower
       }
     },
@@ -25,6 +26,7 @@ EG3.app = (function() {
       name: "level2",
       jsType: "GBBacon",
       description: "Tap to move Sprite.  Avoid the green tomatoes while trying to eat the bacon",
+      victoryMsg: "I love Bacon!",
       meta: {
         numBalls: 4,
         ballSpeed: 10,
@@ -32,6 +34,18 @@ EG3.app = (function() {
         baconDelay: 2,//seconds
         baconFadeMillis: 2000,
         baconSpeed: 100
+      }
+    },
+    {
+      name: "level3",
+      jsType: "BouncyBalls",
+      description: "This level exists because I don't want to walk off the array",
+      victoryMsg: "Nice",
+      meta: {
+        numBalls: 6,
+        ballSpeed: 50,
+        totalTime: 1000*1,
+        playerSpeedFactor: 5,//Bigger = slower
       }
     }
   ];
@@ -95,6 +109,9 @@ EG3.app = (function() {
     getCurrentLevelDesc: function() {
       console.log("Pointer: " + currentLevelPtr);
       return levels[currentLevelPtr].description;
+    },
+    getCurrentLevelVictoryMsg: function() {
+      return levels[currentLevelPtr].victoryMsg;
     }
   };
 }());

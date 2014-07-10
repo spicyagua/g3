@@ -71,15 +71,17 @@ EG3.BoundyRG = function() {
   /**
    *
    */
-  this.update = function() {
+  this.updateImpl = function() {
     if(this.firstUpdate) {
       this.firstUpdate = false;
       this.countownClock.startTimming();
     }
     else {
       if(!this.playerDead && this.countownClock.update()) {
-        console.log("Need a victory method and plan of action");
-        EG3.app.advanceLevel();
+        this.levelCompleted();
+        return;
+//        console.log("Need a victory method and plan of action");
+
         //change state
         //return
       }

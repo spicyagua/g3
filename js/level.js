@@ -3,10 +3,19 @@ var EG3 = EG3 || {};
 
 /**
  * Object to serve as prototype of other levels (i.e. common stuff).  Children should
- * not have a "create" method and instead use "oneTimeCreate" and "reset"
+ * not have a "create" method and instead use "oneTimeCreate" and "reset".  They should
+ * not have an "update" but rather an "updateImpl".  Other manditory functions:
+ *
+ * displayFailState - after the level decides the player has failed, the prototype (this)
+ * will offer a retry button.  The level may choose what background state (i.e. stop the balls,
+ * have the sprite fall, etc) if shown behind the retry button
+ *
+ * displayVictoryState - like "displayFailState", this lets the level decide what is going on
+ * "behind" the "leve level" button
  */
 EG3.Level = function() {
   console.log("Level constructor invoked");
+  this.complete = false;
 }
 
 EG3.Level.prototype = {
@@ -40,6 +49,22 @@ EG3.Level.prototype = {
       }
       this.reset();
     }
+  },
+
+  update: function() {
+    if(!this.done) {
+      this.updateImpl();
+    }
+  },
+
+  /**
+   * Called when a level is completed by the user.  Does some animation then
+   * offers the "next level" button
+   */
+  levelCompleted: function() {
+    this.done = true;
+    EG3.app.advanceLevel();
+    this.game.state.start('prelevel');
   },
 
   /**
@@ -333,6 +358,11 @@ EG3.Level.prototype = {
       alive = false;
     };
 
+    var _hidePlayer = function() {
+      playerBody.kill();
+      openPlayerEye.kill();
+    };
+
     var _update = function() {
       //TODO there is some bug where the physics body is already updated, and the eye looks funny
       //falling.  Not really noticable on regular play, but something to be worked out.
@@ -347,7 +377,8 @@ EG3.Level.prototype = {
       playerBody: playerBody,
       revivePlayer: _revivePlayer,
       killPlayer: _killPlayer,
-      update: _update
+      update: _update,
+      hidePlayer: _hidePlayer
     };
   },
 
