@@ -18,7 +18,7 @@ EG3.app = (function() {
       meta: {
         numBalls: 6,
         ballSpeed: 50,
-        totalTime: 1000*10,
+        totalTime: 1000*1,
         playerSpeedFactor: 5,//Bigger = slower
       }
     },

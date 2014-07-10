@@ -35,7 +35,7 @@ EG3.BouncyBalls = function(args) {
    * Part of "level" contract
    */
   this.reset = function() {
-
+    console.log("BouncyBalls.reset()");
 
     this.firstUpdate = true;
 
@@ -43,12 +43,12 @@ EG3.BouncyBalls = function(args) {
 
     this.greenBallGroup.ballsToTheWalls();
 
-    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
+//    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
     //re-enable the tap/follow on the sprite
     this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
 
-    this.countownClock.reset();
+    this.countownClock.reset(this.settings.totalTime);
 
     this.playerDead = false;
   };
@@ -64,6 +64,17 @@ EG3.BouncyBalls = function(args) {
    * Part of the "level" contract
    */
   this.displayFailState = function() {
+    this.disableTapFollow();
+    this.greenBallGroup.stopMoving();
+    this.playerWrapper.killPlayer();
+  };
+  /**
+   * Part of the "level" contract
+   */
+  this.displayVictoryState = function() {
+    this.disableTapFollow();
+    this.greenBallGroup.stopMoving();
+    this.playerWrapper.pausePlayer();
   };
 
   /**
@@ -81,7 +92,7 @@ EG3.BouncyBalls = function(args) {
 //        console.log("Need a victory method and plan of action");
 //        EG3.app.advanceLevel();
 //        this.game.state.start('prelevel');
-        return;
+//        return;
       }
 
     }
@@ -110,6 +121,16 @@ EG3.BouncyBalls = function(args) {
    */
   this.playerBallCollisionProcess = function(playerBody, ball) {
     console.log("Player/ball collision - process callback");
+    if(this.playerDead) {
+      return;
+    }
+
+    //Saving this code since it was cute to have the "dead" player
+    //fall to the ground through all of the balls.  However, as I refactored
+    //"level" contract it became a pain in the ass to invoke "update" while
+    //in the failed state.
+
+    /*
 
     if(this.playerDead) {
       //It is cute to still have the player bounce off of things as it decends
@@ -129,6 +150,8 @@ EG3.BouncyBalls = function(args) {
     this.playerWrapper.playerBody.checkWorldBounds = true;
     this.playerWrapper.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
 
+    */
+    this.playerDead = true;
     this.levelFailed();
 
     return true;

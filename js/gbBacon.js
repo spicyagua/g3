@@ -90,6 +90,21 @@ EG3.GBBacon = function(args) {
     this.playerWrapper.update();
   };
 
+  this.displayFailState = function() {
+    this.baconWrapper.pauseBacon();
+    this.greenBallGroup.stopMoving();
+    this.playerWrapper.killPlayer();
+    this.disableTapFollow();
+
+  };
+
+  this.displayVictoryState = function() {
+    this.baconWrapper.pauseBacon();
+    this.greenBallGroup.stopMoving();
+    this.playerWrapper.pausePlayer();
+    this.disableTapFollow();
+  };
+
   /**
    * Callback when a dead sprite finally falls off the world
    */
@@ -99,10 +114,11 @@ EG3.GBBacon = function(args) {
 
 
   this.playerBaconCollisionProcess = function() {
-    this.baconWrapper.killBacon();
-    this.greenBallGroup.stopMoving();
-    this.playerWrapper.hidePlayer();
+//    this.baconWrapper.killBacon();
+//    this.greenBallGroup.stopMoving();
+//    this.playerWrapper.hidePlayer();
     this.gotBacon = true;
+    this.levelCompleted();
   };
 
   /**
@@ -131,7 +147,6 @@ EG3.GBBacon = function(args) {
 
     this.levelFailed();
 
-    this.baconWrapper.killBacon();
 
     return true;
   };

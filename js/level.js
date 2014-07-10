@@ -15,7 +15,7 @@ var EG3 = EG3 || {};
  */
 EG3.Level = function() {
   console.log("Level constructor invoked");
-  this.complete = false;
+  this.skipNextUpdate = false;
 }
 
 EG3.Level.prototype = {
@@ -39,7 +39,16 @@ EG3.Level.prototype = {
       this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
       this.againButtonGroup.add(this.againButton);
       this.againButton.anchor.setTo(0.5,0.5);
+      console.log("Hide again button");
       this.againButtonGroup.visible = false;
+
+      this.nextLevelButtonGroup = this.game.add.group();
+      this.nextLevelButton = this.game.add.button(this.game.width/2, (this.game.height/4)*3, 'playButton', this.nextLevelClicked, this);
+      this.nextLevelButtonGroup.add(this.nextLevelButton);
+      this.nextLevelButton.anchor.setTo(0.5,0.5);
+      this.nextLevelButtonGroup.visible = false;
+
+
 
     }
     else {
@@ -51,7 +60,17 @@ EG3.Level.prototype = {
     }
   },
 
+
   update: function() {
+
+    //This little bit of hackery has to do with timing.  If we reset but
+    //don't skip the next "update" the previous state is still there (so we
+    //get a phantom collision).
+    if(this.skipNextUpdate) {
+      this.skipNextUpdate = false;
+      return;
+    }
+
     if(!this.done) {
       this.updateImpl();
     }
@@ -62,17 +81,25 @@ EG3.Level.prototype = {
    * offers the "next level" button
    */
   levelCompleted: function() {
+    console.log("Level completed");
+    this.hackCount = 2;
     this.done = true;
-    EG3.app.advanceLevel();
-    this.game.state.start('prelevel');
+    this.displayVictoryState();
+    this.nextLevelButtonGroup.visible = true;
+    //TODO: Display the victory message
   },
 
   /**
-   * Called by children when the level fails.  Game is paused until
+   * Called by children when the level fails.  Game is paused (no "update") until
    * user hits "again" button which in turn calls "reset" and the
    * game resumes.
    */
   levelFailed: function() {
+    console.log("Level failed");
+    this.hackCount = 2;
+    this.done = true;
+    this.displayFailState();
+    console.log("Show again button");
     this.againButtonGroup.visible = true;
   },
 
@@ -80,10 +107,19 @@ EG3.Level.prototype = {
    * Callback when "again" is clicked
    */
   againClicked: function() {
-    this.reset();
     //Hide the "again" button
+    this.skipNextUpdate = true;
+    console.log("Hide again button");
     this.againButtonGroup.visible = false;
+    this.reset();
+    this.done = false;
 
+  },
+
+  nextLevelClicked: function() {
+    this.skipNextUpdate = true;
+    EG3.app.advanceLevel();
+    this.game.state.start('prelevel');
   },
 
   /**
@@ -280,6 +316,12 @@ EG3.Level.prototype = {
 
     };
 
+    var _pauseBacon = function() {
+      baconBody.body.gravity.y = 0;
+      baconBody.body.velocity.x = 0;
+      baconBody.body.velocity.y = 0;
+  }
+
 
     return {
       baconBody: baconBody,
@@ -289,7 +331,8 @@ EG3.Level.prototype = {
       eatBacon: _eatBacon,
       stillEating: function() {
         return this.eatTween.isRunning;
-      }
+      },
+      pauseBacon: _pauseBacon
     };
   },
 
@@ -346,6 +389,14 @@ EG3.Level.prototype = {
       alive = true;
     };
 
+    var _pausePlayer = function() {
+      playerBody.body.gravity.y = 0;
+      playerBody.body.velocity.x = 0;
+      playerBody.body.velocity.y = 0;
+      currentPlayerEye.x = playerBody.x;
+      currentPlayerEye.y = playerBody.y;
+    };
+
     var _killPlayer = function() {
       //Replace the eye with the 'X'
       currentPlayerEye.kill();
@@ -353,7 +404,10 @@ EG3.Level.prototype = {
 
       currentPlayerEye.x = playerBody.x;
       currentPlayerEye.y = playerBody.y;
-      playerBody.body.gravity.y = 300;
+//      playerBody.body.gravity.y = 300; Re-add for that cool "falling" effect
+      playerBody.body.gravity.y = 0;
+      playerBody.body.velocity.x = 0;
+      playerBody.body.velocity.y = 0;
 
       alive = false;
     };
@@ -378,7 +432,8 @@ EG3.Level.prototype = {
       revivePlayer: _revivePlayer,
       killPlayer: _killPlayer,
       update: _update,
-      hidePlayer: _hidePlayer
+      hidePlayer: _hidePlayer,
+      pausePlayer: _pausePlayer
     };
   },
 
