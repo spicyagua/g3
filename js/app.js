@@ -18,7 +18,7 @@ EG3.app = (function() {
       meta: {
         numBalls: 6,
         ballSpeed: 50,
-        totalTime: 1000*5,
+        totalTime: 1000*10,
         playerSpeedFactor: 5,//Bigger = slower
       }
     },
@@ -39,12 +39,12 @@ EG3.app = (function() {
     {
       name: "level3",
       jsType: "BouncyBalls",
-      description: "This level exists because I don't want to walk off the array",
-      victoryMsg: "Nice",
+      description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds.  There are more balls this time",
+      victoryMsg: "Wooohooo!",
       meta: {
-        numBalls: 6,
+        numBalls: 8,
         ballSpeed: 50,
-        totalTime: 1000*1,
+        totalTime: 1000*10,
         playerSpeedFactor: 5,//Bigger = slower
       }
     }
@@ -62,7 +62,7 @@ EG3.app = (function() {
     }
 
     //TODO Remove this hack once I resolve cookies
-    currentLevelPtr = 0;
+//    currentLevelPtr = 0;
 
     game = new Phaser.Game(relWidth, relHeight, Phaser.AUTO, 'G3');
 
