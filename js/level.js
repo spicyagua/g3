@@ -36,19 +36,21 @@ EG3.Level.prototype = {
       this.createdOnce = true;
 
       this.againButtonGroup = this.game.add.group();
-      this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'againButton', this.againClicked, this);
+      this.againButton = this.game.add.button(this.game.width/2, this.game.height/2, 'blankButton', this.againClicked, this);
       this.againButtonGroup.add(this.againButton);
       this.againButton.anchor.setTo(0.5,0.5);
-      console.log("Hide again button");
+      //Total hack - I need to find a way to better associate the button and text
+      this.againText = EG3.app.textToButton(this.againButton, "Try Again?");
+      this.againText.visible = false;
       this.againButtonGroup.visible = false;
 
       this.nextLevelButtonGroup = this.game.add.group();
-      this.nextLevelButton = this.game.add.button(this.game.width/2, (this.game.height/4)*3, 'playButton', this.nextLevelClicked, this);
+      this.nextLevelButton = this.game.add.button(this.game.width/2, (this.game.height/4)*3, 'blankButton', this.nextLevelClicked, this);
       this.nextLevelButtonGroup.add(this.nextLevelButton);
       this.nextLevelButton.anchor.setTo(0.5,0.5);
+      this.nextLevelText = EG3.app.textToButton(this.nextLevelButton, "Next Level");
       this.nextLevelButtonGroup.visible = false;
-
-
+      this.nextLevelText.visible = false;
 
     }
     else {
@@ -85,8 +87,37 @@ EG3.Level.prototype = {
     this.hackCount = 2;
     this.done = true;
     this.displayVictoryState();
-    this.nextLevelButtonGroup.visible = true;
+    this.congratsText = this.game.make.text(
+      ((this.game.width-340)/2) +10,//TODO - computation no lnoger needed
+      -100,//this.game.height/4,
+      EG3.app.getCurrentLevelVictoryMsg(),
+      {
+        "font": "72px Comic Sans MS",
+        "fill": "#d2f0cb",
+        "stroke": "#0d1f09",
+        "wordWrap": true,
+        "wordWrapWidth": 340-20,
+        "align": "center"
+      }
+      );
+
+    this.congratsText.align = "center";
+    var ctWidth = this.congratsText.width;
+    this.congratsText.x = (this.game.width/2)-(ctWidth/2);
+
+
+
+//    this.congratsText.update();
+    this.game.world.add(this.congratsText);
     //TODO: Display the victory message
+    var tween = this.game.add.tween(this.congratsText).to({y: this.game.height/4},2000, Phaser.Easing.Bounce.Out, true);
+
+
+    tween.onComplete.add(function() {
+      this.nextLevelButtonGroup.visible = true;
+      this.nextLevelText.visible = true;
+    }.bind(this));
+
   },
 
   /**
@@ -101,6 +132,7 @@ EG3.Level.prototype = {
     this.displayFailState();
     console.log("Show again button");
     this.againButtonGroup.visible = true;
+    this.againText.visible = true;
   },
 
   /**
@@ -111,6 +143,7 @@ EG3.Level.prototype = {
     this.skipNextUpdate = true;
     console.log("Hide again button");
     this.againButtonGroup.visible = false;
+    this.againText.visible = false;
     this.reset();
     this.done = false;
 
@@ -271,6 +304,7 @@ EG3.Level.prototype = {
     var _imgHeight = img.height;
     img = null;
 
+
     var baconBody = this.game.add.sprite(-100,-100, 'bacon');
     this.game.physics.enable(baconBody, Phaser.Physics.ARCADE);
     baconBody.anchor.setTo(0.5, 0.5);
@@ -307,6 +341,7 @@ EG3.Level.prototype = {
       baconBody.revive();
       upperHalf = y<(that.game.world.height/2);
       leftHalf = x<(that.game.world.width/2);
+      baconBody.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
 
       baconBody.x = leftHalf?that.game.world.width-_imgWidth:_imgWidth;
       baconBody.y = upperHalf?that.game.world.width-_imgHeight:_imgHeight;
@@ -317,7 +352,7 @@ EG3.Level.prototype = {
     };
 
     var _pauseBacon = function() {
-      baconBody.body.gravity.y = 0;
+//      baconBody.body.gravity.y = 0;
       baconBody.body.velocity.x = 0;
       baconBody.body.velocity.y = 0;
   }
@@ -346,6 +381,7 @@ EG3.Level.prototype = {
     var that = this;
     var alive = true;
 
+    var playerGroup = this.game.add.group();
     var playerBody = this.game.add.sprite(
       (this.game.world.width/2) - 25,
       (this.game.world.height/2) - 20, 'playerBody');
@@ -364,6 +400,10 @@ EG3.Level.prototype = {
     currentPlayerEye.x = playerBody.x;
     currentPlayerEye.y = playerBody.y;
     currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(currentPlayerEye);
+
+    playerGroup.add(playerBody);
+    playerGroup.add(openPlayerEye);
+    playerGroup.add(deadPlayerEye);
 
     var _revivePlayer = function() {
 
@@ -398,6 +438,7 @@ EG3.Level.prototype = {
     };
 
     var _killPlayer = function() {
+      console.log("_killPlayer");
       //Replace the eye with the 'X'
       currentPlayerEye.kill();
       currentPlayerEye = deadPlayerEye;
@@ -408,6 +449,8 @@ EG3.Level.prototype = {
       playerBody.body.gravity.y = 0;
       playerBody.body.velocity.x = 0;
       playerBody.body.velocity.y = 0;
+
+      playerGroup.bringToTop(currentPlayerEye);
 
       alive = false;
     };

@@ -16,8 +16,10 @@ EG3.Options.prototype = {
     this.game.add.sprite(50,40,"logo");
 //    this.gameLogo = this.game.add.sprite(this.game.width/2-120, 100, 'gameLogo');
     yVal = (this.game.height/6)*5;
-    this.startButton = this.game.add.button(this.game.width/2, yVal, 'playButton', this.startClicked, this);
+    this.startButton = this.game.add.button(this.game.width/2, yVal, 'blankButton', this.startClicked, this);
     this.startButton.anchor.setTo(0.5,0.5);
+    EG3.app.textToButton(this.startButton, "Start");
+
 
     var cenX = (this.game.world.width/2);
     var cenY = (this.game.world.height/7)*4;

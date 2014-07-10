@@ -28,6 +28,7 @@ EG3.Preload.prototype = {
     this.game.load.image('deadEye', 'assets/deadEye.png');
     this.game.load.image('paper', 'assets/paper.png');
     this.game.load.image('bacon', 'assets/bacon.png');
+    this.game.load.image('blankButton', 'assets/blankButton.png');
 
     //Load any audio here
 

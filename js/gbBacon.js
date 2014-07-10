@@ -49,6 +49,7 @@ EG3.GBBacon = function(args) {
     //re-enable the tap/follow on the sprite
     this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
 
+    this.baconWrapper.killBacon();
     this.game.time.events.add(Phaser.Timer.SECOND*this.settings.baconDelay, this.showBacon, this);
 
     this.playerDead = false;
@@ -136,6 +137,7 @@ EG3.GBBacon = function(args) {
     this.playerDead = true;
 
     //nuke tap following player
+/*
     this.disableTapFollow();
     this.playerWrapper.killPlayer();
 
@@ -144,7 +146,7 @@ EG3.GBBacon = function(args) {
     //so I've read) then get a callback when it finally leaves
     this.playerWrapper.playerBody.checkWorldBounds = true;
     this.playerWrapper.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
-
+*/
     this.levelFailed();
 
 

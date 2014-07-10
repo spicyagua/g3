@@ -14,11 +14,11 @@ EG3.app = (function() {
       name: "level1",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
-      victoryMsg: "Sweet",
+      victoryMsg: "Sweet!",
       meta: {
         numBalls: 6,
         ballSpeed: 50,
-        totalTime: 1000*1,
+        totalTime: 1000*5,
         playerSpeedFactor: 5,//Bigger = slower
       }
     },
@@ -96,6 +96,22 @@ EG3.app = (function() {
   };
 
 
+  var _textToButton = function(button, text) {
+
+    var textText = game.make.text(1,1,text,
+      {
+        "font": "32px Comic Sans MS",
+        "fill": "#000000"
+      });
+
+    textText.x = ((button.x - (button.width*button.anchor.x))+(button.width/2))- (textText.width/2);
+    textText.y = ((button.y - (button.height*button.anchor.y))+(button.height/2)) - (textText.height/2);
+    game.world.add(textText);
+
+    return textText;
+  };
+
+
   return {
     REL_WIDTH: relWidth,
     REL_HEIGHT: relHeight,
@@ -112,7 +128,10 @@ EG3.app = (function() {
     },
     getCurrentLevelVictoryMsg: function() {
       return levels[currentLevelPtr].victoryMsg;
-    }
+    },
+    getCurrentLevelIndex: function() {return currentLevelPtr;},
+    textToButton: _textToButton
+
   };
 }());
 
