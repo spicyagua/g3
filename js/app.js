@@ -130,7 +130,12 @@ EG3.app = (function() {
       return levels[currentLevelPtr].victoryMsg;
     },
     getCurrentLevelIndex: function() {return currentLevelPtr;},
-    textToButton: _textToButton
+    textToButton: _textToButton,
+    resetToFirstLevel: function() {
+      currentLevelPtr = 0;
+      console.log("Reset to initial level");
+      jQuery.cookie("current_level", currentLevelPtr, { expires: 28} );
+    }
 
   };
 }());

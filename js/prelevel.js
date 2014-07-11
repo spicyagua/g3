@@ -43,7 +43,7 @@ EG3.Prelevel.prototype = {
       this.levelTitle = this.game.make.text(
         10,
         30,//TODO hardocded height
-        "Level " + (EG3.app.getCurrentLevelIndex()+1),
+        "Level " + (((EG3.app.getCurrentLevelIndex()*1)+1)),
         style
         );
       var ltWidth = this.levelTitle.width;

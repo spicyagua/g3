@@ -16,9 +16,33 @@ EG3.Options.prototype = {
     this.game.add.sprite(50,40,"logo");
 //    this.gameLogo = this.game.add.sprite(this.game.width/2-120, 100, 'gameLogo');
     yVal = (this.game.height/6)*5;
-    this.startButton = this.game.add.button(this.game.width/2, yVal, 'blankButton', this.startClicked, this);
-    this.startButton.anchor.setTo(0.5,0.5);
-    EG3.app.textToButton(this.startButton, "Start");
+
+    if(EG3.app.getCurrentLevelIndex() > 0) {
+
+      var img = this.game.cache.getImage("blankButton");
+      var imgHalf = Math.floor(img.width/2);
+      var diff = this.game.width - (img.width*2);
+      var gap = Math.floor(diff/3);
+      var continueStart = gap + imgHalf;
+      var startStart = (gap*2)+img.width + imgHalf;
+
+      var continueButton = this.game.add.button(continueStart, yVal, "blankButton",this.startClicked,this);
+      continueButton.anchor.setTo(0.5,0.5);
+      EG3.app.textToButton(continueButton, "Continue");
+
+      this.startButton = this.game.add.button(startStart, yVal, "blankButton",
+        function() {
+          EG3.app.resetToFirstLevel();
+          this.startClicked();
+        }, this);
+      this.startButton.anchor.setTo(0.5,0.5);
+      EG3.app.textToButton(this.startButton, "Restart");
+    }
+    else {
+      this.startButton = this.game.add.button(this.game.width/2, yVal, "blankButton", this.startClicked, this);
+      this.startButton.anchor.setTo(0.5,0.5);
+      EG3.app.textToButton(this.startButton, "Start");
+    }
 
 
     var cenX = (this.game.world.width/2);
