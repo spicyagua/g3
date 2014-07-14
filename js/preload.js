@@ -15,6 +15,7 @@ EG3.Preload.prototype = {
     this.game.load.image('logo', 'assets/logo.png');
     this.game.load.image('splash', 'assets/bg3.png');
     this.game.load.image('greenBall', 'assets/greenBall.png');
+    this.game.load.image('redBall', 'assets/redBall.png');
     this.game.load.image('playerBody', 'assets/playerBody.png');
     this.game.load.image('playerEye', 'assets/playerEye.png');
     this.game.load.image('bodyBig', 'assets/bodyBig.png');

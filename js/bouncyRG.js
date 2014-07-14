@@ -1,42 +1,39 @@
 var EG3 = EG3 || {};
 
-EG3.BoundyRG = function() {
+EG3.BouncyRG = function(args) {
 
-  console.log("BoundyRG function invoked");
-  this.numBalls = 8;
-  this.ballSpeed = 40;
-  this.totalTime = 1000*20;
-  this.playerSpeedFactor = 5;//bigger means slower
-  this.firstUpdate = true;
+  console.log("BouncyRG constructor invoked");
 
-  /*
-  this.countownClock;
-  this.playerWrapper
-  this.greenBallGroup
-  */
-
-
+  this.settings = args;
 
   /**
    *
    */
   this.onetimeCreate = function() {
-    console.log("BoundyRG.onetimeCreate");
+    console.log("BouncyRG.onetimeCreate");
+
+    var s = this.settings;
 
     //Add background
     this.game.add.sprite(0,0,"bg");
 
     this.greenBallGroup = this.createBallGroup(
       "greenBall",
-      this.numBalls,
-      this.ballSpeed);
+      s.numGreenBalls,
+      s.greenBallSpeed);
+
+    this.redBallGroup = this.createBallGroup(
+      "redBall",
+      s.numRedBalls,
+      s.redBallSpeed);
+    this.redBallGroup.distributeRandom();
+    this.redBallGroup.hideAll();
+
+    this.game.time.events.add(Phaser.Timer.SECOND*2/*TODO Hardcoded*/, this.showRed, this);
 
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
-
     this.enableTapFollow(this.playerWrapper.playerBody);
-
-    this.countownClock = this.createCountDownTimer(this.totalTime);
   };
 
 
@@ -45,67 +42,95 @@ EG3.BoundyRG = function() {
    */
   this.reset = function() {
 
-
-    this.firstUpdate = true;
-
     this.playerWrapper.revivePlayer();
 
     this.greenBallGroup.ballsToTheWalls();
+    this.redBallGroup.distributeRandom();
+    this.redBallGroup.hideAll();
+    this.game.time.events.add(Phaser.Timer.SECOND*2/*TODO Hardcoded*/, this.showRed, this);
 
-    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
-
-    this.enableTapFollow(this.playerWrapper.playerBody);
-
-    this.countownClock.reset();
+    //re-enable the tap/follow on the sprite
+    this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
 
     this.playerDead = false;
   };
 
   /**
-   *
-   */
-  this.init = function(params) {
-    console.log("Init called.  This is how I can pass state between ... states");
-  };
-
-  /**
-   *
+   * Part of "level" contract
    */
   this.updateImpl = function() {
-    if(this.firstUpdate) {
-      this.firstUpdate = false;
-      this.countownClock.startTimming();
+/*
+    if(!this.playerDead && this.gotBacon) {
+      //Edge case I'm not sure will happen (perhaps once)
+      return;
     }
-    else {
-      if(!this.playerDead && this.countownClock.update()) {
-        this.levelCompleted();
-        return;
-//        console.log("Need a victory method and plan of action");
-
-        //change state
-        //return
-      }
-
-    }
+*/
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
     this.game.physics.arcade.collide(this.greenBallGroup.group);
+    this.game.physics.arcade.collide(this.redBallGroup.group);
+    this.game.physics.arcade.collide(this.greenBallGroup.group,this.redBallGroup.group);
+
     this.game.physics.arcade.collide(this.playerWrapper.playerBody,
       this.greenBallGroup.group,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
     this.playerWrapper.update();
+
+    this.game.physics.arcade.collide(this.playerWrapper.playerBody,
+      this.redBallGroup.group);/*,
+      this.uselessFunction,
+      this.playerRedBallCollision,
+      this);*/
+    this.playerWrapper.update();
   };
 
   /**
-   * Callback when a dead sprite finally falls off the world
+   * Part of "level" contract
    */
-  this.spriteLeftWorld = function() {
-    console.log("Sprite left world");
+  this.displayFailState = function() {
+    this.greenBallGroup.stopMoving();
+    this.redBallGroup.stopMoving();
+    this.playerWrapper.killPlayer();
+    this.disableTapFollow();
+
   };
 
+  /**
+   * Part of "level" contract
+   */
+  this.displayVictoryState = function() {
+    this.greenBallGroup.stopMoving();
+    this.redBallGroup.stopMoving();
+    this.playerWrapper.pausePlayer();
+    this.disableTapFollow();
+  };
+
+  this.playerRedBallCollision = function(player, ball) {
+    console.log(ball);
+    return true;
+    console.log("Living in green group (1): " + this.greenBallGroup.group.countLiving());
+    var gb = this.greenBallGroup.group.getFirstAlive();
+    if(gb == null) {
+      //Woops - edge case bug
+      console.error("Red ball collision but no green balls left");
+      return false;
+    }
+    gb.kill();
+console.log("Living in green group (2): " + this.greenBallGroup.group.countLiving());
+    if(this.greenBallGroup.group.countLiving() == 0) {
+      this.levelCompleted();
+      return true;
+    }
+    return true;
+  }
+
+  this.playerBaconCollisionProcess = function() {
+    this.gotBacon = true;
+    this.levelCompleted();
+  };
 
   /**
    *
@@ -114,36 +139,23 @@ EG3.BoundyRG = function() {
     console.log("Player/ball collision - process callback");
 
     if(this.playerDead) {
-      //It is cute to still have the player bounce off of things as it decends
-      //into the abyss
+      //Edge case I saw once, but perhaps isn't needed anymore
       return true;
     }
 
     this.playerDead = true;
-
-    this.disableTapFollow();
-
-    this.playerWrapper.killPlayer();
-
-    //Tell the player sprite to care
-    //if it leaves the world (normally expensive
-    //so I've read) then get a callback when it finally leaves
-    this.playerWrapper.playerBody.checkWorldBounds = true;
-    this.playerWrapper.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
-
     this.levelFailed();
-
     return true;
   };
 
-
-  this.shutDown = function() {
-    console.log("Shutting down BoundyRG");
+  this.showRed = function() {
+    console.log("Show red balls");
+    this.redBallGroup.fadeIn(this.settings.redFadeInMillis);
   };
 };
 
-EG3.BoundyRG.constructor = EG3.BoundyRG;
+EG3.BouncyRG.constructor = EG3.BouncyRG;
 
-EG3.BoundyRG.prototype = new EG3.Level();
+EG3.BouncyRG.prototype = new EG3.Level();
 
 

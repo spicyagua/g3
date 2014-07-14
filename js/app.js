@@ -38,13 +38,15 @@ EG3.app = (function() {
     },
     {
       name: "level3",
-      jsType: "BouncyBalls",
-      description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds.  There are more balls this time",
-      victoryMsg: "Wooohooo!",
+      jsType: "BouncyRG",
+      description: "This level is currently broken.  Don't play",
+      victoryMsg: "You showed them tomatoes",
       meta: {
-        numBalls: 8,
-        ballSpeed: 50,
-        totalTime: 1000*10,
+        numGreenBalls: 4,
+        greenBallSpeed: 20,
+        numRedBalls: 4,
+        redBallSpeed: 50,
+        redFadeInMillis: 2000,
         playerSpeedFactor: 5,//Bigger = slower
       }
     }
@@ -92,7 +94,12 @@ EG3.app = (function() {
       case "GBBacon":
         return new EG3.GBBacon(args);
         break;
+      case "BouncyRG":
+        return new EG3.BouncyRG(args);
+        break;
+
     }
+
   };
 
 

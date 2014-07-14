@@ -232,6 +232,9 @@ EG3.Level.prototype = {
 
     var that = this;
 
+    var worldWidth = this.game.world.width;
+    var worldHeight = this.game.world.height;
+
     //Cache the image dimensions.  We'll use them a lot later
     var img = this.game.cache.getImage(imageName);
     var _imgWidth = img.width;
@@ -281,6 +284,23 @@ EG3.Level.prototype = {
       }, that);
     };
 
+    var _hideAll = function() {
+      _ballGroup.visible = false;
+    };
+
+    var _fadeIn = function(fadeInMillis) {
+      _ballGroup.alpha = 0
+      _ballGroup.visible = true;
+      this.fade = that.game.add.tween(_ballGroup).to({alpha:1}, fadeInMillis, Phaser.Easing.Linear.NONE, true);
+    };
+
+    var _distributeRandom = function() {
+      _ballGroup.forEach(function(ball) {
+        ball.x = Math.random()*worldWidth;
+        ball.y = Math.random()*worldHeight;
+      }, this);
+    };
+
     var _stopMotion = function() {
 //      _ballGroup.callAll("body.velocity.setTo", null, 0, 0);
       _ballGroup.forEach(function(ball) {
@@ -291,7 +311,10 @@ EG3.Level.prototype = {
     return {
       group: _ballGroup,
       ballsToTheWalls: _bttw,
-      stopMoving: _stopMotion
+      stopMoving: _stopMotion,
+      hideAll: _hideAll,
+      fadeIn: _fadeIn,
+      distributeRandom: _distributeRandom
     };
 
   },
@@ -387,6 +410,11 @@ EG3.Level.prototype = {
       (this.game.world.height/2) - 20, 'playerBody');
     playerBody.anchor.setTo(0.5, 0.5);
     this.game.physics.enable(playerBody, Phaser.Physics.ARCADE);
+
+
+    //Added so RG works, but may have effects in other levels.
+    playerBody.body.bounce.setTo(0,0);
+    playerBody.immovable = true;
 
     var deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
     deadPlayerEye.anchor.setTo(0.5, 0.375);
