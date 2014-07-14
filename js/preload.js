@@ -14,10 +14,6 @@ EG3.Preload.prototype = {
     this.game.load.image('bg', 'assets/bg2.png');
     this.game.load.image('logo', 'assets/logo.png');
     this.game.load.image('splash', 'assets/bg3.png');
-    this.game.load.image('gameLogo', 'assets/someGame.png');
-    this.game.load.image('startButton', 'assets/startButton.png');
-    this.game.load.image('playButton', 'assets/playButton.png');
-    this.game.load.image('againButton', 'assets/againButton.png');
     this.game.load.image('greenBall', 'assets/greenBall.png');
     this.game.load.image('playerBody', 'assets/playerBody.png');
     this.game.load.image('playerEye', 'assets/playerEye.png');
@@ -34,17 +30,8 @@ EG3.Preload.prototype = {
 
     this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
   },
-  create: function() {
-    console.log("Preload.create");
-  },
-  update: function() {
-    if(this.loadComplete) {
-      console.log("Preload.update - load complete");
-      this.game.state.start("options");
-    }
-  },
   onLoadComplete: function() {
     console.log("Preload.onLoadComplete");
-    this.loadComplete = true;
+    this.game.state.start("options");
   }
 };
