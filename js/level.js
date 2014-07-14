@@ -547,13 +547,13 @@ EG3.Level.prototype = {
    * "00.00" format
    */
   timeToDisplayTime: function(t) {
+
     if(t == 0) {
       return "00.00";
     }
     var seconds = Math.floor(t/1000);
-    var decis = t % 100;
-    //TODO Fix this.  It isn't correct, but goes by too fast so it creates
-    //the illusion of a "real" time
+    var decis = Math.floor((t % 1000)/10);
+//    console.log(t + " sec: " + seconds + ", dec: " + decis);
     if(decis < 10) {decis = '0' + decis;}
     if(seconds < 10) {seconds = '0' + seconds;}
     return seconds + "." + decis;

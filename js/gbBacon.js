@@ -2,10 +2,9 @@ var EG3 = EG3 || {};
 
 EG3.GBBacon = function(args) {
 
-  console.log("GBBacon function invoked");
-  this.settings = args;
+  console.log("GBBacon constructor invoked");
 
-  this.firstUpdate = true;
+  this.settings = args;
 
   /**
    *
@@ -13,16 +12,18 @@ EG3.GBBacon = function(args) {
   this.onetimeCreate = function() {
     console.log("GBBacon.onetimeCreate");
 
+    var s = this.settings;
+
     //Add background
     this.game.add.sprite(0,0,"bg");
 
     this.greenBallGroup = this.createBallGroup(
       "greenBall",
-      this.settings.numBalls,
-      this.settings.ballSpeed);
+      s.numBalls,
+      s.ballSpeed);
 
-    this.baconWrapper = this.createBaconWrapper(this.settings.baconSpeed);
-    this.game.time.events.add(Phaser.Timer.SECOND*this.settings.baconDelay, this.showBacon, this);
+    this.baconWrapper = this.createBaconWrapper(s.baconSpeed);
+    this.game.time.events.add(Phaser.Timer.SECOND*s.baconDelay, this.showBacon, this);
 
     this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
@@ -37,40 +38,29 @@ EG3.GBBacon = function(args) {
    */
   this.reset = function() {
 
-
-    this.firstUpdate = true;
-
     this.playerWrapper.revivePlayer();
 
     this.greenBallGroup.ballsToTheWalls();
 
-    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
+//    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
     //re-enable the tap/follow on the sprite
     this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
 
     this.baconWrapper.killBacon();
+
     this.game.time.events.add(Phaser.Timer.SECOND*this.settings.baconDelay, this.showBacon, this);
 
     this.playerDead = false;
   };
 
   /**
-   *
-   */
-  this.init = function(params) {
-    console.log("Init called.  This is how I can pass state between ... states");
-  };
-
-  /**
-   *
+   * Part of "level" contract
    */
   this.updateImpl = function() {
 
-    if(!this.playerDead && this.gotBacon) {//TODO - need logic for when bacon is eaten to stop balls and add flag
-      console.log("Need a victory method and plan of action");
-//      EG3.app.advanceLevel();
-//      this.game.state.start('prelevel');
+    if(!this.playerDead && this.gotBacon) {
+      //Edge case I'm not sure will happen (perhaps once)
       return;
     }
 
@@ -91,6 +81,9 @@ EG3.GBBacon = function(args) {
     this.playerWrapper.update();
   };
 
+  /**
+   * Part of "level" contract
+   */
   this.displayFailState = function() {
     this.baconWrapper.pauseBacon();
     this.greenBallGroup.stopMoving();
@@ -99,6 +92,9 @@ EG3.GBBacon = function(args) {
 
   };
 
+  /**
+   * Part of "level" contract
+   */
   this.displayVictoryState = function() {
     this.baconWrapper.pauseBacon();
     this.greenBallGroup.stopMoving();
@@ -106,18 +102,7 @@ EG3.GBBacon = function(args) {
     this.disableTapFollow();
   };
 
-  /**
-   * Callback when a dead sprite finally falls off the world
-   */
-  this.spriteLeftWorld = function() {
-    console.log("Sprite left world");
-  };
-
-
   this.playerBaconCollisionProcess = function() {
-//    this.baconWrapper.killBacon();
-//    this.greenBallGroup.stopMoving();
-//    this.playerWrapper.hidePlayer();
     this.gotBacon = true;
     this.levelCompleted();
   };
@@ -129,33 +114,13 @@ EG3.GBBacon = function(args) {
     console.log("Player/ball collision - process callback");
 
     if(this.playerDead) {
-      //It is cute to still have the player bounce off of things as it decends
-      //into the abyss
+      //Edge case I saw once, but perhaps isn't needed anymore
       return true;
     }
 
     this.playerDead = true;
-
-    //nuke tap following player
-/*
-    this.disableTapFollow();
-    this.playerWrapper.killPlayer();
-
-    //Tell the player sprite to care
-    //if it leaves the world (normally expensive
-    //so I've read) then get a callback when it finally leaves
-    this.playerWrapper.playerBody.checkWorldBounds = true;
-    this.playerWrapper.playerBody.events.onOutOfBounds.add(this.spriteLeftWorld, this);
-*/
     this.levelFailed();
-
-
     return true;
-  };
-
-
-  this.shutDown = function() {
-    console.log("Shutting down level1");
   };
 
   this.showBacon = function() {
