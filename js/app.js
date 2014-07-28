@@ -11,6 +11,16 @@ EG3.app = (function() {
   // This should be fetched by XHR in the future, but this is fine for now.
   var levels = [
     {
+      name: "level0",
+      jsType: "Space",
+      description: "Keep going up into space",
+      victoryMsg: "Sweet!",
+      meta: {
+        skySpeed: 50, //I think in px/sec.  Larger is faster.
+        playerSpeedFactor: 5,//Bigger = slower
+      }
+    },
+    {
       name: "level1",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
@@ -96,6 +106,9 @@ EG3.app = (function() {
         break;
       case "BouncyRG":
         return new EG3.BouncyRG(args);
+        break;
+      case "Space":
+        return new EG3.Space(args);
         break;
 
     }
