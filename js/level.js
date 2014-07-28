@@ -129,6 +129,20 @@ EG3.Level.prototype = {
     console.log("Level failed");
     this.hackCount = 2;
     this.done = true;
+
+    navigator.vibrate = navigator.vibrate ||
+                navigator.webkitVibrate ||
+                navigator.mozVibrate ||
+                navigator.msVibrate;
+    if (navigator.vibrate) {
+        console.log("About to vibrate phone");
+        navigator.vibrate([3000]);
+        console.log("Done vibrating (maybe)");
+    }
+    else {
+      console.log("Vibrate not enabled");
+    }
+
     this.displayFailState();
     console.log("Show again button");
     this.againButtonGroup.visible = true;
@@ -494,7 +508,7 @@ EG3.Level.prototype = {
       currentPlayerEye.x = playerBody.x;
       currentPlayerEye.y = playerBody.y;
       if(alive) {
-        currentPlayerEye.rotation = that.game.physics.arcade.angleToPointer(currentPlayerEye);
+        currentPlayerEye.rotation = (Math.PI*1.5) + that.game.physics.arcade.angleToPointer(currentPlayerEye);
     }
     };
 

@@ -31,6 +31,8 @@ EG3.Preload.prototype = {
 
     this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
   },
+  update: function() {
+  },
   onLoadComplete: function() {
     console.log("Preload.onLoadComplete");
     this.game.state.start("options");
