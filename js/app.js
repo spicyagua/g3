@@ -11,17 +11,6 @@ EG3.app = (function() {
   // This should be fetched by XHR in the future, but this is fine for now.
   var levels = [
     {
-      name: "level0",
-      jsType: "Space",
-      description: "Keep going up into space",
-      victoryMsg: "Sweet!",
-      meta: {
-        skySpeed: 50, //I think in px/sec.  Larger is faster.
-        playerSpeed: 400,//Bigger = faster
-        playerSpeedFactor: 5,//Bigger = slower
-      }
-    },
-    {
       name: "level1",
       jsType: "BouncyBalls",
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
@@ -49,16 +38,16 @@ EG3.app = (function() {
     },
     {
       name: "level3",
-      jsType: "BouncyRG",
-      description: "This level is currently broken.  Don't play",
-      victoryMsg: "You showed them tomatoes",
+      jsType: "Space",
+      description: "Keep going up into space for 20 seconds, avoid the green tomatoes",
+      victoryMsg: "Dude!",
       meta: {
-        numGreenBalls: 4,
-        greenBallSpeed: 20,
-        numRedBalls: 4,
-        redBallSpeed: 50,
-        redFadeInMillis: 2000,
-        playerSpeedFactor: 5,//Bigger = slower
+        totalTime: 1000*20,
+        skySpeed: 150, //I think in px/sec.  Larger is faster.
+        playerSpeed: 400,//Bigger = faster
+        ballFrequency: 1,//new balls/sec
+        ballVelocity: 50,//Pixels/sec
+        ballVelocityRandomness: 0.7//multiplied by Math.random and ballVelocity then added to ballVelocity
       }
     }
   ];

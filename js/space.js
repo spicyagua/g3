@@ -24,8 +24,12 @@ EG3.Space = function(args) {
     //Add background
     this.tileSprite = this.game.add.tileSprite(0,0,this.game.world.width, this.game.world.height,"spaceBackground");
     this.tileSprite.autoScroll(0,s.skySpeed);
-    this.playerWrapper = this.createPlayerWrapper();
+    this.sprite = new this.BlobSprite(this.game, this.settings);
+    this.ballGroup = new this.BallGroup(this.game, this.settings);
+    this.ballGroup.startBalls();
     this.game.input.onTap.add(this.tapHandler);
+    this.countownClock = this.createCountDownTimer(this.settings.totalTime);
+    this.firstUpdate = true;
   };
 
 
@@ -33,29 +37,58 @@ EG3.Space = function(args) {
    * Part of "level" contract
    */
   this.reset = function() {
-
+    this.sprite.resetPlayer();
+    this.ballGroup.resetBalls();
+    this.ballGroup.startBalls();
+    this.game.input.onTap.add(this.tapHandler);
+    this.tileSprite.autoScroll(0,this.settings.skySpeed);
+    this.countownClock.reset(this.settings.totalTime);
+    this.firstUpdate = true;
   };
 
   /**
    * Part of "level" contract
    */
   this.updateImpl = function() {
-//    var foo = this.tileSprite;
-//    foo.tilePosition.y+=1;
-//    console.log("Position: " + foo.tilePosition.y);
-    this.playerWrapper.update();
+    if(this.firstUpdate) {
+      this.firstUpdate = false;
+      this.countownClock.startTimming();
+    }
+    else {
+      if(this.countownClock.update()) {
+        this.levelCompleted();
+        return;
+      }
+    }
+
+    if(this.game.physics.arcade.collide(this.sprite, this.ballGroup)) {
+      console.log("Collide");
+      this.levelFailed();
+    }
   };
 
   /**
    * Part of "level" contract
    */
   this.displayFailState = function() {
+    this.endRound();
+    this.sprite.killPlayer();
   };
 
   /**
    * Part of "level" contract
    */
   this.displayVictoryState = function() {
+    this.endRound();
+  };
+
+  /**
+   * Factor out of fail/victory
+   */
+  this.endRound = function() {
+    this.ballGroup.stopBalls();
+    this.game.input.onTap.remove(this.tapHandler);
+    this.tileSprite.stopScroll();
   };
 
   /**
@@ -65,107 +98,207 @@ EG3.Space = function(args) {
   this.displayTapped = function() {
     //From the debugger (!?!) I know that arguments[0] is a point where
     //the tap happened.
-    console.log("Tap: " + arguments[0].x + ", " + arguments[0].y);
     var args = arguments;
-    console.log("Arg length: " + arguments.length);
-    this.playerWrapper.slideToX(arguments[0].x);
+    this.sprite.slideToX(arguments[0].x);
   };
 
 
-  /**
-   * Restart over the old "base class" approach.  This also
-   * assumes we're creating the player near the bottom, and records
-   * y position (line) over-which the player will slide
-   */
-  this.createPlayerWrapper = function() {
+  //=============================================================
+  //  Extended Types
+  //=============================================================
 
-    var that = this;
+
+  //BEGIN Ball Group
+  this.BallGroup = function(game, settings) {
+
+    //Call Group's constructor
+    Phaser.Group.call(this, game);
+
+    //Add to game
+    this.game.add.existing(this);
+
+    this.settings = settings;
+
+    //Figure out how big to make the ball group (approx)
+    var worldHeight = this.game.world.height;
+    var expectedTravelTime = Math.ceil(worldHeight/settings.ballVelocity);
+    var expectedBalls = 2*(Math.ceil(expectedTravelTime * settings.ballFrequency));
+
+    //Convienence so all balls will have physics enabled
+    this.physicsBodyType = Phaser.Physics.ARCADE;
+    this.enableBody = true;
+
+    console.log("Creating: " + expectedBalls + " balls");
+    for(var i = 0; i<expectedBalls; i++) {
+      var s = this.create(-100,-100, "greenBall");
+      s.name = "greenBall" + i;
+      s.checkWorldBounds = true;
+      s.outOfBoundsKill = true;
+      s.kill();
+      s.body.velocity.setTo(0,0);
+
+    }
+
+    //For the timer
+    this.newBallTimer = {};//I know I don't need to "declare" this...
+
+  };
+  this.BallGroup.prototype = Object.create(Phaser.Group.prototype);
+  this.BallGroup.prototype.constructor = this.BallGroup;
+
+  /**
+   * Private
+   */
+  this.BallGroup.prototype._addBall = function() {
+    console.log("Adding ball");
+    var ball = this.getFirstDead();
+    ball.reset(Math.round(Math.random() * this.game.world.width), (-1*ball.height));
+    var yVel = (this.settings.ballVelocity + (this.settings.ballVelocity * (Math.random() * this.settings.ballVelocityRandomness)));
+    ball.body.velocity.setTo(0, yVel);
+
+
+  };
+
+  this.BallGroup.prototype.startBalls = function() {
+    this.newBallTimer = this.game.time.events.loop(
+      Math.round(Phaser.Timer.SECOND/this.settings.ballFrequency),
+      this._addBall,
+      this);
+  };
+  this.BallGroup.prototype.stopBalls = function() {
+    this.game.time.events.remove(this.newBallTimer);
+    this.forEach(function(ball) {
+      ball.body.velocity.setTo(0,0);
+    }, this);
+  };
+
+  this.BallGroup.prototype.resetBalls = function() {
+    this.forEach(function(ball) {
+      ball.kill();
+    }, this);
+  };
+
+  //ENDOF Ball Group
+
+
+  //BEGIN Blob Sprite
+
+  //Extended Sprite for our BlobSprite
+  this.BlobSprite = function(game, settings) {
+    //Call Sprite's constructor
+    Phaser.Sprite.call(this, game, 0, 0, "playerBody");
+
+    this.settings = settings;
 
     //Hack because I can't seem to find a good way to move
     //and tweens seem to mess-up colissions
-    var moving = false;
-    var movingTo = {};
+    this.moving = false;
+    this.movingTo = {};
 
-    //Cache player dimensions
-    var img = this.game.cache.getImage("playerBody");
-    var _imgWidth = img.width;
-    var _imgHeight = img.height;
-    img = null;
+    this.playerGroup = this.game.add.group();
+    this.anchor.setTo(0.5, 0.5);
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.game.add.existing(this);
 
-    var playerGroup = this.game.add.group();
+    this.x = Math.round((this.game.world.width/2) + (this.width/2));
+    this.y = this.game.world.height - this.height - (Math.round(this.height/2));
 
-    //Position player near bottom.  Record the Y position
-    var yPos = this.game.world.height - _imgHeight - (Math.round(_imgHeight/2));
-    var xPos = Math.round((this.game.world.width/2) + (_imgWidth/2));
+    this.deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
+    this.deadPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(this.deadPlayerEye, Phaser.Physics.ARCADE);
 
-    var playerBody = this.game.add.sprite(0,0, 'playerBody');
-    playerBody.anchor.setTo(0.5, 0.5);
-    playerBody.x = xPos;
-    playerBody.y = yPos;
-    this.game.physics.enable(playerBody, Phaser.Physics.ARCADE);
+    this.openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
+    this.openPlayerEye.anchor.setTo(0.5, 0.375);
+    this.game.physics.enable(this.openPlayerEye, Phaser.Physics.ARCADE);
+    this.currentPlayerEye = this.openPlayerEye;
+
+    this.currentPlayerEye.x = this.x;
+    this.currentPlayerEye.y = this.y;
+    this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
+
+    this.playerGroup.add(this);
+    this.playerGroup.add(this.openPlayerEye);
+    this.playerGroup.add(this.deadPlayerEye);
+    this.playerGroup.bringToTop(this.openPlayerEye);
 
 
-    var deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
-    deadPlayerEye.anchor.setTo(0.5, 0.375);
-    this.game.physics.enable(deadPlayerEye, Phaser.Physics.ARCADE);
-
-    var openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
-    openPlayerEye.anchor.setTo(0.5, 0.375);
-    this.game.physics.enable(openPlayerEye, Phaser.Physics.ARCADE);
-    var currentPlayerEye = openPlayerEye;
-
-    currentPlayerEye.x = playerBody.x;
-    currentPlayerEye.y = playerBody.y;
-    currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(currentPlayerEye);
-
-    playerGroup.add(playerBody);
-    playerGroup.add(openPlayerEye);
-    playerGroup.add(deadPlayerEye);
-
-    var _update = function() {
-      //TODO there is some bug where the physics body is already updated, and the eye looks funny
-      //falling.  Not really noticable on regular play, but something to be worked out.
-      console.log("Player: " + playerBody.x + ", " + playerBody.y + ", Physics body: " + playerBody.body.x + ", " + playerBody.body.y);
-      currentPlayerEye.x = playerBody.x;
-      currentPlayerEye.y = playerBody.y;
-      if(true) {
-        currentPlayerEye.rotation = (Math.PI*1.5) + that.game.physics.arcade.angleToPointer(currentPlayerEye);
-      }
-      if(moving) {
-        if(
-          (playerBody.x >= movingTo.x && movingTo.fwd) ||
-          (playerBody.x <= movingTo.x && (!movingTo.fwd))
-          ) {
-          moving = false;
-          _stopPlayer();
-        }
-      }
-    };
-
-    var _slideToX = function(x) {
-      if(moving) {
-        _stopPlayer();
-        movingTo = null;
-      }
-      movingTo = {x: x, y: yPos, fwd: (x>playerBody.x?true:false)};
-      that.game.physics.arcade.accelerateToXY(playerBody, x, yPos, that.settings.playerSpeed);
-      moving = true;
-    };
-
-    var _stopPlayer = function() {
-      playerBody.body.acceleration.x =
-      playerBody.body.acceleration.y =
-      playerBody.body.velocity.x =
-      playerBody.body.velocity.y = 0;
-    };
-
-    return {
-      playerBody: playerBody,
-      update: _update,
-      yPos: yPos,
-      slideToX: _slideToX
-    };
   };
+
+  this.BlobSprite.prototype = Object.create(Phaser.Sprite.prototype);
+  this.BlobSprite.prototype.constructor = this.BlobSprite;
+
+  this.BlobSprite.prototype.update = function() {
+/*
+    console.log("Moving?: " + this.moving +
+      " PlayerXY: " + this.x + ", " + this.y +
+      ", Physics bodyXY: " + this.body.x + ", " + this.body.y +
+      ", PositionXY: " + this.position.x + ", " + this.position.y +
+      ", Body.PositionXY: " + this.body.position.x + ", " + this.body.position.y);
+*/
+    //Position the *body* this may be ahead (coordinate-wise) from the
+    //display of the sprite
+    this.currentPlayerEye.body.x = this.body.x;
+    this.currentPlayerEye.body.y = this.body.y;
+
+    this.currentPlayerEye.rotation = (Math.PI*1.5) + this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
+
+    if(this.moving) {
+      if(
+        (this.x >= this.movingTo.x && this.movingTo.fwd) ||
+        (this.x <= this.movingTo.x && (!this.movingTo.fwd)) ||
+        (this.body.x <= 0 && (!this.movingTo.fwd)) ||
+        (((this.body.x + this.width) >= this.game.world.width) && this.movingTo.fwd)
+        ) {
+        this.moving = false;
+        this._stopPlayer();
+      }
+    }
+  };
+
+  this.BlobSprite.prototype.slideToX = function(x) {
+    if(this.moving) {
+      this._stopPlayer();
+      this.movingTo = null;
+    }
+    this.movingTo = {x: x, y: this.y, fwd: (x>this.x?true:false)};
+    this.game.physics.arcade.accelerateToXY(this, x, this.y, this.settings.playerSpeed);
+    this.moving = true;
+
+  };
+
+  this.BlobSprite.prototype._stopPlayer = function() {
+    this.body.acceleration.x =
+    this.body.acceleration.y =
+    this.body.velocity.x =
+    this.body.velocity.y = 0;
+  };
+
+  this.BlobSprite.prototype.killPlayer = function() {
+    this._stopPlayer();
+    this.currentPlayerEye.kill();
+    this.currentPlayerEye = this.deadPlayerEye;
+
+    this.currentPlayerEye.body.x = this.body.x;
+    this.currentPlayerEye.body.y = this.body.y;
+    this.playerGroup.bringToTop(this.currentPlayerEye);
+  };
+
+  this.BlobSprite.prototype.resetPlayer = function() {
+    this.x = Math.round((this.game.world.width/2) + (this.width/2));
+    this.y = this.game.world.height - this.height - (Math.round(this.height/2));
+
+    this.deadPlayerEye.x = -100;
+    this.deadPlayerEye.y = -100;
+
+    this.openPlayerEye.revive();
+    this.currentPlayerEye = this.openPlayerEye;;
+
+    this.moving = false;
+    this.update();
+  };
+
+
+  //ENDOF Blob Sprite
 
   //Wrap this at end of constructor once functions have been created
   this.tapHandler = this.displayTapped.bind(this);
