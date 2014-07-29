@@ -50,6 +50,9 @@ EG3.Space = function(args) {
    * Part of "level" contract
    */
   this.updateImpl = function() {
+
+    //Clock tricks.  I decided to only start the clock after the
+    //first update (so they won't see it "already running").
     if(this.firstUpdate) {
       this.firstUpdate = false;
       this.countownClock.startTimming();
@@ -83,7 +86,7 @@ EG3.Space = function(args) {
   };
 
   /**
-   * Factor out of fail/victory
+   * Factored out of fail/victory
    */
   this.endRound = function() {
     this.ballGroup.stopBalls();
@@ -108,7 +111,11 @@ EG3.Space = function(args) {
   //=============================================================
 
 
-  //BEGIN Ball Group
+  // ===== BEGIN Ball Group =====
+
+  /**
+   * Constructor.  Reads several settings to configure the group
+   */
   this.BallGroup = function(game, settings) {
 
     //Call Group's constructor
@@ -147,7 +154,7 @@ EG3.Space = function(args) {
   this.BallGroup.prototype.constructor = this.BallGroup;
 
   /**
-   * Private
+   * Private.  Adds a ball to the game world
    */
   this.BallGroup.prototype._addBall = function() {
     console.log("Adding ball");
@@ -158,13 +165,19 @@ EG3.Space = function(args) {
 
 
   };
-
+  /**
+   * Start dispensing balls
+   */
   this.BallGroup.prototype.startBalls = function() {
     this.newBallTimer = this.game.time.events.loop(
       Math.round(Phaser.Timer.SECOND/this.settings.ballFrequency),
       this._addBall,
       this);
   };
+
+  /**
+   * Stop dispensing balls
+   */
   this.BallGroup.prototype.stopBalls = function() {
     this.game.time.events.remove(this.newBallTimer);
     this.forEach(function(ball) {
@@ -172,18 +185,23 @@ EG3.Space = function(args) {
     }, this);
   };
 
+  /**
+   * Go back to as-created state (before first "startBalls" call).
+   */
   this.BallGroup.prototype.resetBalls = function() {
     this.forEach(function(ball) {
       ball.kill();
     }, this);
   };
 
-  //ENDOF Ball Group
+  //===== ENDOF Ball Group =====
 
 
-  //BEGIN Blob Sprite
+  //===== BEGIN Blob Sprite =====
 
-  //Extended Sprite for our BlobSprite
+  /**
+   * Constructor
+   */
   this.BlobSprite = function(game, settings) {
     //Call Sprite's constructor
     Phaser.Sprite.call(this, game, 0, 0, "playerBody");
@@ -212,10 +230,6 @@ EG3.Space = function(args) {
     this.game.physics.enable(this.openPlayerEye, Phaser.Physics.ARCADE);
     this.currentPlayerEye = this.openPlayerEye;
 
-    this.currentPlayerEye.x = this.x;
-    this.currentPlayerEye.y = this.y;
-    this.currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
-
     this.playerGroup.add(this);
     this.playerGroup.add(this.openPlayerEye);
     this.playerGroup.add(this.deadPlayerEye);
@@ -227,14 +241,10 @@ EG3.Space = function(args) {
   this.BlobSprite.prototype = Object.create(Phaser.Sprite.prototype);
   this.BlobSprite.prototype.constructor = this.BlobSprite;
 
+  /**
+   * Note that update is automagically called by Phaser
+   */
   this.BlobSprite.prototype.update = function() {
-/*
-    console.log("Moving?: " + this.moving +
-      " PlayerXY: " + this.x + ", " + this.y +
-      ", Physics bodyXY: " + this.body.x + ", " + this.body.y +
-      ", PositionXY: " + this.position.x + ", " + this.position.y +
-      ", Body.PositionXY: " + this.body.position.x + ", " + this.body.position.y);
-*/
     //Position the *body* this may be ahead (coordinate-wise) from the
     //display of the sprite
     this.currentPlayerEye.body.x = this.body.x;
@@ -255,6 +265,9 @@ EG3.Space = function(args) {
     }
   };
 
+  /**
+   * Slide the blob along a fixed line
+   */
   this.BlobSprite.prototype.slideToX = function(x) {
     if(this.moving) {
       this._stopPlayer();
@@ -266,6 +279,9 @@ EG3.Space = function(args) {
 
   };
 
+  /**
+   * Private function to stop the damm thing from moving
+   */
   this.BlobSprite.prototype._stopPlayer = function() {
     this.body.acceleration.x =
     this.body.acceleration.y =
@@ -273,6 +289,9 @@ EG3.Space = function(args) {
     this.body.velocity.y = 0;
   };
 
+  /**
+   * Puts the display into mode where the player has the dead-eye
+   */
   this.BlobSprite.prototype.killPlayer = function() {
     this._stopPlayer();
     this.currentPlayerEye.kill();
@@ -283,6 +302,9 @@ EG3.Space = function(args) {
     this.playerGroup.bringToTop(this.currentPlayerEye);
   };
 
+  /**
+   * Reset the player back to as-created form
+   */
   this.BlobSprite.prototype.resetPlayer = function() {
     this.x = Math.round((this.game.world.width/2) + (this.width/2));
     this.y = this.game.world.height - this.height - (Math.round(this.height/2));
@@ -298,7 +320,7 @@ EG3.Space = function(args) {
   };
 
 
-  //ENDOF Blob Sprite
+  //===== ENDOF Blob Sprite =====
 
   //Wrap this at end of constructor once functions have been created
   this.tapHandler = this.displayTapped.bind(this);
