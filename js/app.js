@@ -17,6 +17,7 @@ EG3.app = (function() {
       victoryMsg: "Sweet!",
       meta: {
         skySpeed: 50, //I think in px/sec.  Larger is faster.
+        playerSpeed: 400,//Bigger = faster
         playerSpeedFactor: 5,//Bigger = slower
       }
     },

@@ -1,5 +1,12 @@
 var EG3 = EG3 || {};
 
+
+/**
+
+ I'm giving up on a lot of the Phaser features, as I keep having to manually
+ do things like colissions, decelleration, etc.
+
+ */
 EG3.Space = function(args) {
 
   console.log("Space constructor invoked");
@@ -74,6 +81,11 @@ EG3.Space = function(args) {
 
     var that = this;
 
+    //Hack because I can't seem to find a good way to move
+    //and tweens seem to mess-up colissions
+    var moving = false;
+    var movingTo = {};
+
     //Cache player dimensions
     var img = this.game.cache.getImage("playerBody");
     var _imgWidth = img.width;
@@ -113,15 +125,38 @@ EG3.Space = function(args) {
     var _update = function() {
       //TODO there is some bug where the physics body is already updated, and the eye looks funny
       //falling.  Not really noticable on regular play, but something to be worked out.
+      console.log("Player: " + playerBody.x + ", " + playerBody.y + ", Physics body: " + playerBody.body.x + ", " + playerBody.body.y);
       currentPlayerEye.x = playerBody.x;
       currentPlayerEye.y = playerBody.y;
       if(true) {
         currentPlayerEye.rotation = (Math.PI*1.5) + that.game.physics.arcade.angleToPointer(currentPlayerEye);
       }
+      if(moving) {
+        if(
+          (playerBody.x >= movingTo.x && movingTo.fwd) ||
+          (playerBody.x <= movingTo.x && (!movingTo.fwd))
+          ) {
+          moving = false;
+          _stopPlayer();
+        }
+      }
     };
 
     var _slideToX = function(x) {
-      that.game.physics.arcade.moveToXY(playerBody, x, yPos);
+      if(moving) {
+        _stopPlayer();
+        movingTo = null;
+      }
+      movingTo = {x: x, y: yPos, fwd: (x>playerBody.x?true:false)};
+      that.game.physics.arcade.accelerateToXY(playerBody, x, yPos, that.settings.playerSpeed);
+      moving = true;
+    };
+
+    var _stopPlayer = function() {
+      playerBody.body.acceleration.x =
+      playerBody.body.acceleration.y =
+      playerBody.body.velocity.x =
+      playerBody.body.velocity.y = 0;
     };
 
     return {
