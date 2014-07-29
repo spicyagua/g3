@@ -39,7 +39,7 @@ EG3.app = (function() {
     {
       name: "level3",
       jsType: "Space",
-      description: "Keep going up into space for 20 seconds, avoid the green tomatoes",
+      description: "Keep going up into space for 20 seconds, avoid the green tomatoes by moving left/right.",
       victoryMsg: "Dude!",
       meta: {
         totalTime: 1000*20,
@@ -49,7 +49,85 @@ EG3.app = (function() {
         ballVelocity: 50,//Pixels/sec
         ballVelocityRandomness: 0.7//multiplied by Math.random and ballVelocity then added to ballVelocity
       }
+    },
+    {
+      name: "level4",
+      jsType: "SpaceRG",
+      description: "Keep going into space, avoid green tomatoes.  If you hit a red tomato, it blows away the green ones.  60 seconds",
+      victoryMsg: "Yea Baby!",
+      meta: {
+        totalTime: 1000*60,
+        skySpeed: 150, //I think in px/sec.  Larger is faster.
+        playerSpeed: 400,//Bigger = faster
+        ballFrequency: 1,//new balls/sec
+        ballVelocity: 50,//Pixels/sec
+        ballVelocityRandomness: 0.7,//multiplied by Math.random and ballVelocity then added to ballVelocity
+        redBallFrequency: 0.3,//new balls/sec
+        redBallVelocity: 80,//Pixels/sec
+        redBallVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+
+      }
+    },
+    {
+      name: "level5",
+      jsType: "BouncyBalls",
+      description: "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds.  They are faster now.",
+      victoryMsg: "Keep going!",
+      meta: {
+        numBalls: 8,
+        ballSpeed: 60,
+        totalTime: 1000*20,
+        playerSpeedFactor: 4,//Bigger = slower
+      }
+    },
+    {
+      name: "level6",
+      jsType: "GBBacon",
+      description: "Tap to move Sprite.  Avoid the green tomatoes while trying to eat the bacon",
+      victoryMsg: "Still Love Bacon!",
+      meta: {
+        numBalls: 6,
+        ballSpeed: 30,
+        playerSpeedFactor: 5,
+        baconDelay: 2,//seconds
+        baconFadeMillis: 2000,
+        baconSpeed: 100
+      }
+    },
+    {
+      name: "level7",
+      jsType: "Space",
+      description: "Left/right to avoid green balls for 30 seconds",
+      victoryMsg: "You Rock!",
+      meta: {
+        totalTime: 1000*30,
+        skySpeed: 170, //I think in px/sec.  Larger is faster.
+        playerSpeed: 500,//Bigger = faster
+        ballFrequency: 1.5,//new balls/sec
+        ballVelocity: 50,//Pixels/sec
+        ballVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+      }
+    },
+    {
+      name: "level8",
+      jsType: "SpaceRG",
+      description: "Move left/right.  Avoid Green tomatoes.  Red ones blow away green ones.  2 minutes",
+      victoryMsg: "Yea Baby!",
+      meta: {
+        totalTime: 1000*120,
+        skySpeed: 170, //I think in px/sec.  Larger is faster.
+        playerSpeed: 500,//Bigger = faster
+        ballFrequency: 2,//new balls/sec
+        ballVelocity: 50,//Pixels/sec
+        ballVelocityRandomness: 0.7,//multiplied by Math.random and ballVelocity then added to ballVelocity
+        redBallFrequency: 0.3,//new balls/sec
+        redBallVelocity: 50,//Pixels/sec
+        redBallVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+
+      }
     }
+
+
   ];
 
 
@@ -99,6 +177,9 @@ EG3.app = (function() {
         break;
       case "Space":
         return new EG3.Space(args);
+        break;
+      case "SpaceRG":
+        return new EG3.SpaceRG(args);
         break;
 
     }
