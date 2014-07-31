@@ -16,12 +16,9 @@ EG3.BouncyBalls = function(args) {
     //Add background
     this.game.add.sprite(0,0,"bg");
 
-    this.greenBallGroup = this.createBallGroup(
-      "greenBall",
-      this.settings.numBalls,
-      this.settings.ballSpeed);
-
-    this.greenBallGroup.ballsToTheWalls();
+    this.greenBallGroup = new this.RandomBallGroup(this.game, this.settings.greenBallGroupSettings);
+    this.greenBallGroup.init();
+    this.greenBallGroup.bttw();
     this.playerWrapper = this.createPlayerWrapper();
 
     //Ask prototype to enable tab/follow motion of player
@@ -41,7 +38,7 @@ EG3.BouncyBalls = function(args) {
 
     this.playerWrapper.revivePlayer();
 
-    this.greenBallGroup.ballsToTheWalls();
+    this.greenBallGroup.bttw();
 
 //    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
@@ -65,7 +62,7 @@ EG3.BouncyBalls = function(args) {
    */
   this.displayFailState = function() {
     this.disableTapFollow();
-    this.greenBallGroup.stopMoving();
+    this.greenBallGroup.stopBalls();
     this.playerWrapper.killPlayer();
   };
   /**
@@ -73,7 +70,7 @@ EG3.BouncyBalls = function(args) {
    */
   this.displayVictoryState = function() {
     this.disableTapFollow();
-    this.greenBallGroup.stopMoving();
+    this.greenBallGroup.stopBalls();
     this.playerWrapper.pausePlayer();
   };
 
@@ -95,9 +92,9 @@ EG3.BouncyBalls = function(args) {
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
-    this.game.physics.arcade.collide(this.greenBallGroup.group);
+    this.game.physics.arcade.collide(this.greenBallGroup);
     this.game.physics.arcade.collide(this.playerWrapper.playerBody,
-      this.greenBallGroup.group,
+      this.greenBallGroup,
       null,//this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);

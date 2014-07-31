@@ -17,15 +17,13 @@ EG3.GBBacon = function(args) {
     //Add background
     this.game.add.sprite(0,0,"bg");
 
-    this.greenBallGroup = this.createBallGroup(
-      "greenBall",
-      s.numBalls,
-      s.ballSpeed);
+    this.greenBallGroup = new this.RandomBallGroup(this.game, this.settings.greenBallGroupSettings);
+    this.greenBallGroup.init();
+    this.greenBallGroup.bttw();
 
     this.baconWrapper = this.createBaconWrapper(s.baconSpeed);
     this.game.time.events.add(Phaser.Timer.SECOND*s.baconDelay, this.showBacon, this);
 
-    this.greenBallGroup.ballsToTheWalls();
     this.playerWrapper = this.createPlayerWrapper();
 
     //Ask prototype to enable tab/follow motion of player
@@ -40,7 +38,7 @@ EG3.GBBacon = function(args) {
 
     this.playerWrapper.revivePlayer();
 
-    this.greenBallGroup.ballsToTheWalls();
+    this.greenBallGroup.bttw();
 
 //    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
 
@@ -67,9 +65,9 @@ EG3.GBBacon = function(args) {
     //Useful thing which shows the bounding box of the sprite
 //    this.game.debug.body(this.playerEye);
 
-    this.game.physics.arcade.collide(this.greenBallGroup.group);
+    this.game.physics.arcade.collide(this.greenBallGroup);
     this.game.physics.arcade.collide(this.playerWrapper.playerBody,
-      this.greenBallGroup.group,
+      this.greenBallGroup,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
@@ -86,7 +84,7 @@ EG3.GBBacon = function(args) {
    */
   this.displayFailState = function() {
     this.baconWrapper.pauseBacon();
-    this.greenBallGroup.stopMoving();
+    this.greenBallGroup.stopBalls();
     this.playerWrapper.killPlayer();
     this.disableTapFollow();
 
@@ -97,7 +95,7 @@ EG3.GBBacon = function(args) {
    */
   this.displayVictoryState = function() {
     this.baconWrapper.pauseBacon();
-    this.greenBallGroup.stopMoving();
+    this.greenBallGroup.stopBalls();
     this.playerWrapper.pausePlayer();
     this.disableTapFollow();
   };

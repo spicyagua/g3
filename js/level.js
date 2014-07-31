@@ -625,6 +625,12 @@ ELP.BallGroup = function(game, settings) {
 
   this.settings = settings;
 
+  //Cache the image dimensions.  We'll use them a lot later
+  var img = this.game.cache.getImage(this.settings.imageName);
+  this.ballDiameter = img.width;
+  img = null;
+
+
 };
 ELP.BallGroup.prototype = Object.create(Phaser.Group.prototype);
 ELP.BallGroup.prototype.constructor = ELP.BallGroup;
@@ -643,8 +649,6 @@ ELP.BallGroup.prototype.init = function() {
     var s = this.create(-100,-100, this.settings.imageName);
     this.initializeBall(s);
   }
-
-
 };
 
 /**
@@ -662,6 +666,7 @@ ELP.BallGroup.prototype.getTotalGroupBallCount = function() {
  * be reassigned by child types.
  */
 ELP.BallGroup.prototype.initializeBall = function(ball) {
+  console.log("BallGroup.initializeBall");
   //  s.name = "greenBall" + i; TODO: have some base name in the settings,
   //and use the count from the group to assign a unique name
   ball.checkWorldBounds = true;
@@ -685,11 +690,74 @@ ELP.BallGroup.prototype.stopBalls = function() {
  * Go back to as-created state (before first "startBalls" call).
  */
 ELP.BallGroup.prototype.resetBalls = function() {
+  console.log("BallGroup.resetBalls");
   this.forEach(function(ball) {
     ball.kill();
-    ball.reset(-100, -100);
+    ball.reset(-1*this.ballDiameter*2, -1*this.ballDiameter*2);
   }, this);
 };
+
+
+// ===== BEGIN Random Ball Group =====
+
+/**
+ * Group of balls that randomly bounce around the world boundaries,
+ * bouncing off the walls.
+ */
+ELP.RandomBallGroup = function(game, settings) {
+  //Call Group's constructor
+  ELP.BallGroup.call(this, game, settings);
+
+  console.log("RandomBallGroup constructor");
+};
+
+ELP.RandomBallGroup.prototype = Object.create(ELP.BallGroup.prototype);
+ELP.RandomBallGroup.prototype.constructor = ELP.RandomBallGroup;
+
+ELP.RandomBallGroup.prototype.initializeBall = function(ball) {
+  console.log("RandomBallGroup.initializeBall");
+  ball.checkWorldBounds = true;
+  ball.body.collideWorldBounds = true;
+  ball.body.bounce.setTo(1, 1);
+  //TODO: Change this to use the randomness setting
+  ball.body.velocity.setTo(
+    10 + Math.random() * this.settings.ballVelocity,
+    10 + Math.random() * this.settings.ballVelocity);
+};
+
+/**
+ * Balls to the walls
+ */
+ELP.RandomBallGroup.prototype.bttw = function(ball) {
+  console.log("RandomBallGroup.bttw");
+  //Try to distribute the balls along the walls so as to not
+  //begin the game in collision with each other or
+  //the player sprite
+  var numBalls = this.getTotalGroupBallCount();
+  var ySpace = (this.game.world.height-(this.ballDiameter*2))/((numBalls-2)/2);
+  var childCount = 0;
+
+  this.forEach(function(b) {
+    var leftSide = true;
+    if(childCount*2 >= numBalls) {
+      leftSide = false;
+    }
+    var startx = (leftSide?this.ballDiameter:(this.game.world.width - this.ballDiameter));
+    var starty = (leftSide?
+      (childCount*ySpace):
+      ((childCount - ((numBalls)/2))*ySpace)
+      )+this.ballDiameter;
+    b.reset(startx, starty);
+    this.initializeBall(b);
+    childCount++;
+  }, this);
+};
+
+
+
+
+// ===== ENDOF Random Ball Group =====
+
 
 
 // ===== BEGIN Falling Ball Group =====

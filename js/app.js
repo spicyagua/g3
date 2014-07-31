@@ -16,7 +16,11 @@ EG3.app = (function() {
       description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds",
       victoryMsg: "Sweet!",
       meta: {
-        numBalls: 6,
+        greenBallGroupSettings: {
+          numBalls: 6,
+          imageName: "greenBall",
+          ballVelocity: 50//Pixels/sec
+        },
         ballSpeed: 50,
         totalTime: 1000*10,
         playerSpeedFactor: 5,//Bigger = slower
@@ -28,8 +32,11 @@ EG3.app = (function() {
       description: "Tap to move Sprite.  Avoid the green tomatoes while trying to eat the bacon",
       victoryMsg: "I love Bacon!",
       meta: {
-        numBalls: 4,
-        ballSpeed: 10,
+        greenBallGroupSettings: {
+          numBalls: 4,
+          imageName: "greenBall",
+          ballVelocity: 10//Pixels/sec
+        },
         playerSpeedFactor: 5,
         baconDelay: 2,//seconds
         baconFadeMillis: 2000,
@@ -82,8 +89,11 @@ EG3.app = (function() {
       description: "Tap to move Sprite.  Avoid the green tomatoes for 20 seconds.  They are faster now.",
       victoryMsg: "Keep going!",
       meta: {
-        numBalls: 8,
-        ballSpeed: 60,
+        greenBallGroupSettings: {
+          numBalls: 8,
+          imageName: "greenBall",
+          ballVelocity: 60//Pixels/sec
+        },
         totalTime: 1000*20,
         playerSpeedFactor: 4,//Bigger = slower
       }
@@ -94,8 +104,11 @@ EG3.app = (function() {
       description: "Tap to move Sprite.  Avoid the green tomatoes while trying to eat the bacon",
       victoryMsg: "Still Love Bacon!",
       meta: {
-        numBalls: 6,
-        ballSpeed: 30,
+        greenBallGroupSettings: {
+          numBalls: 6,
+          imageName: "greenBall",
+          ballVelocity: 30//Pixels/sec
+        },
         playerSpeedFactor: 5,
         baconDelay: 2,//seconds
         baconFadeMillis: 2000,
