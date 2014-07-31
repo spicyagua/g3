@@ -1,8 +1,8 @@
 var EG3 = EG3 || {};
 
-EG3.BouncyBalls = function(args) {
+EG3.BBWithTiles = function(args) {
 
-  console.log("Level1 function invoked");
+  console.log("BBWithTiles function invoked");
   this.settings = args;
 
   this.firstUpdate = true;
@@ -11,7 +11,7 @@ EG3.BouncyBalls = function(args) {
    * Part of the "level" contract
    */
   this.onetimeCreate = function() {
-    console.log("BouncyBalls.onetimeCreate");
+    console.log("BBWithTiles.onetimeCreate");
 
     //Add background
     this.game.add.sprite(0,0,"bg");
@@ -27,6 +27,16 @@ EG3.BouncyBalls = function(args) {
     this.enableTapFollow(this.sprite);
 
     this.countownClock = this.createCountDownTimer(this.settings.totalTime);
+
+    this.map = this.game.add.tilemap("tilemap1");
+    this.map.addTilesetImage("tile2");
+
+    var layer = this.map.createLayer(0);
+    layer.resizeWorld();
+    //I've found no docs on how this is scaled, and the examples seem really odd (i.e. I can't figure out how they got their numbers).
+    //TODO: Try with "0,2" since we have only one image.  May be the trick
+    this.map.setCollisionBetween(0, 100);
+
   };
 
 
@@ -111,8 +121,8 @@ EG3.BouncyBalls = function(args) {
   };
 };
 
-EG3.BouncyBalls.constructor = EG3.BouncyBalls;
+EG3.BBWithTiles.constructor = EG3.BBWithTiles;
 
-EG3.BouncyBalls.prototype = new EG3.Level();
+EG3.BBWithTiles.prototype = new EG3.Level();
 
 

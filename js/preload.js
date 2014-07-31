@@ -27,6 +27,8 @@ EG3.Preload.prototype = {
     this.game.load.image("bacon", "assets/bacon.png");
     this.game.load.image("blankButton", "assets/blankButton.png");
     this.game.load.image("spaceBackground", "assets/spaceBackground.png");
+    this.game.load.tilemap("tilemap1", "assets/tilemap1.json");
+    this.game.load.image("tile2", "assets/tile2.png");
 
     //Load any audio here
 

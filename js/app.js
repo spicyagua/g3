@@ -10,6 +10,24 @@ EG3.app = (function() {
 
   // This should be fetched by XHR in the future, but this is fine for now.
   var levels = [
+/*
+    {
+      name: "level0",
+      jsType: "BBWithTiles",
+      description: "Tap to move Sprite.  Avoid the green tomatoes for 10 seconds.  You can't pass through the bricks",
+      victoryMsg: "Yea Wall-Buster!",
+      meta: {
+        greenBallGroupSettings: {
+          numBalls: 6,
+          imageName: "greenBall",
+          ballVelocity: 50//Pixels/sec
+        },
+        ballSpeed: 50,
+        totalTime: 1000*10,
+        playerSpeedFactor: 5,//Bigger = slower
+      }
+    },
+*/
     {
       name: "level1",
       jsType: "BouncyBalls",
@@ -210,6 +228,9 @@ EG3.app = (function() {
         break;
       case "SpaceRG":
         return new EG3.SpaceRG(args);
+        break;
+      case "BBWithTiles":
+        return new EG3.BBWithTiles(args);
         break;
 
     }
