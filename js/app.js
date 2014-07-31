@@ -45,9 +45,12 @@ EG3.app = (function() {
         totalTime: 1000*20,
         skySpeed: 150, //I think in px/sec.  Larger is faster.
         playerSpeed: 400,//Bigger = faster
-        ballFrequency: 1,//new balls/sec
-        ballVelocity: 50,//Pixels/sec
-        ballVelocityRandomness: 0.7//multiplied by Math.random and ballVelocity then added to ballVelocity
+        greenBallGroupSettings: {
+          imageName: "greenBall",
+          ballFrequency: 1,//new balls/sec
+          ballVelocity: 50,//Pixels/sec
+          ballVelocityRandomness: 0.7//multiplied by Math.random and ballVelocity then added to ballVelocity
+        }
       }
     },
     {
@@ -59,13 +62,18 @@ EG3.app = (function() {
         totalTime: 1000*60,
         skySpeed: 150, //I think in px/sec.  Larger is faster.
         playerSpeed: 400,//Bigger = faster
-        ballFrequency: 1,//new balls/sec
-        ballVelocity: 50,//Pixels/sec
-        ballVelocityRandomness: 0.7,//multiplied by Math.random and ballVelocity then added to ballVelocity
-        redBallFrequency: 0.3,//new balls/sec
-        redBallVelocity: 80,//Pixels/sec
-        redBallVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
-
+        greenBallGroupSettings: {
+          imageName: "greenBall",
+          ballFrequency: 1,//new balls/sec
+          ballVelocity: 50,//Pixels/sec
+          ballVelocityRandomness: 0.7,//multiplied by Math.random and ballVelocity then added to ballVelocity
+        },
+        redBallGroupSettings: {
+          imageName: "redBall",
+          ballFrequency: 0.3,//new balls/sec
+          ballVelocity: 80,//Pixels/sec
+          ballVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+        }
       }
     },
     {
@@ -103,9 +111,12 @@ EG3.app = (function() {
         totalTime: 1000*30,
         skySpeed: 170, //I think in px/sec.  Larger is faster.
         playerSpeed: 500,//Bigger = faster
-        ballFrequency: 1.5,//new balls/sec
-        ballVelocity: 50,//Pixels/sec
-        ballVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+        greenBallGroupSettings: {
+          imageName: "greenBall",
+          ballFrequency: 1.5,//new balls/sec
+          ballVelocity: 50,//Pixels/sec
+          ballVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+        }
       }
     },
     {
@@ -117,12 +128,18 @@ EG3.app = (function() {
         totalTime: 1000*120,
         skySpeed: 170, //I think in px/sec.  Larger is faster.
         playerSpeed: 500,//Bigger = faster
-        ballFrequency: 2,//new balls/sec
-        ballVelocity: 50,//Pixels/sec
-        ballVelocityRandomness: 0.7,//multiplied by Math.random and ballVelocity then added to ballVelocity
-        redBallFrequency: 0.3,//new balls/sec
-        redBallVelocity: 50,//Pixels/sec
-        redBallVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+        greenBallGroupSettings: {
+          imageName: "greenBall",
+          ballFrequency: 2,//new balls/sec
+          ballVelocity: 50,//Pixels/sec
+          ballVelocityRandomness: 0.7//multiplied by Math.random and ballVelocity then added to ballVelocity
+        },
+        redBallGroupSettings: {
+          imageName: "redBall",
+          ballFrequency: 0.3,//new balls/sec
+          ballVelocity: 50,//Pixels/sec
+          ballVelocityRandomness: 0.8//multiplied by Math.random and ballVelocity then added to ballVelocity
+        }
 
       }
     }

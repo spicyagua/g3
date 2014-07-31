@@ -101,7 +101,7 @@ EG3.Level.prototype = {
       }
       );
 
-    this.congratsText.align = "center";
+//    this.congratsText.align = "center";
     var ctWidth = this.congratsText.width;
     this.congratsText.x = (this.game.width/2)-(ctWidth/2);
 
@@ -601,3 +601,156 @@ EG3.Level.prototype = {
     return seconds + "." + decis;
   },
 };
+
+//Save some typing
+ELP = EG3.Level.prototype;
+
+/**
+ * Constructor for base ball group.  Reads several settings to configure the group
+ *
+ * Settings:
+ * ballVelocity
+ * imageName
+ * ballVelocityRandomness
+ */
+ELP.BallGroup = function(game, settings) {
+
+  //Call Group's constructor
+  Phaser.Group.call(this, game);
+
+  console.log("BallGroup constructor");
+
+  //Add to game
+  this.game.add.existing(this);
+
+  this.settings = settings;
+
+};
+ELP.BallGroup.prototype = Object.create(Phaser.Group.prototype);
+ELP.BallGroup.prototype.constructor = ELP.BallGroup;
+
+ELP.BallGroup.prototype.init = function() {
+  console.log("BallGroup.init");
+  var expectedBalls = this.getTotalGroupBallCount();
+
+  console.log("BallGroup.  Expected balls: " + expectedBalls);
+
+  //Convienence so all balls will have physics enabled
+  this.physicsBodyType = Phaser.Physics.ARCADE;
+  this.enableBody = true;
+
+  for(var i = 0; i<expectedBalls; i++) {
+    var s = this.create(-100,-100, this.settings.imageName);
+    this.initializeBall(s);
+  }
+
+
+};
+
+/**
+ * Returns the total number of balls to create for the group.  This is called
+ * during "init".  This function may be replaced.  For now, it looks for
+ * a setting "numBalls"
+ */
+ELP.BallGroup.prototype.getTotalGroupBallCount = function() {
+  console.log("BallGroup.getTotalGroupBallCount");
+  return this.settings.numBalls;
+};
+
+/**
+ * Set any properties on a ball being created for the group.  May
+ * be reassigned by child types.
+ */
+ELP.BallGroup.prototype.initializeBall = function(ball) {
+  //  s.name = "greenBall" + i; TODO: have some base name in the settings,
+  //and use the count from the group to assign a unique name
+  ball.checkWorldBounds = true;
+  ball.outOfBoundsKill = true;
+  ball.kill();
+  ball.body.velocity.setTo(0,0);
+};
+
+
+/**
+ * Stop dispensing balls
+ */
+ELP.BallGroup.prototype.stopBalls = function() {
+  console.log("BallGroup.stopBalls");
+  this.forEach(function(ball) {
+    ball.body.velocity.setTo(0,0);
+  }, this);
+};
+
+/**
+ * Go back to as-created state (before first "startBalls" call).
+ */
+ELP.BallGroup.prototype.resetBalls = function() {
+  this.forEach(function(ball) {
+    ball.kill();
+    ball.reset(-100, -100);
+  }, this);
+};
+
+
+// ===== BEGIN Falling Ball Group =====
+
+/**
+ * Settings (in addition to "Ball Group")
+ * - ballFrequency
+ */
+ELP.FallingBallGroup = function(game, settings) {
+  //Call Group's constructor
+  ELP.BallGroup.call(this, game, settings);
+
+  //For the timer
+  this.newBallTimer = {};//I know I don't need to "declare" this...
+
+  console.log("FallingBallGroup constructor");
+};
+
+ELP.FallingBallGroup.prototype = Object.create(ELP.BallGroup.prototype);
+ELP.FallingBallGroup.prototype.constructor = ELP.FallingBallGroup;
+
+ELP.FallingBallGroup.prototype.stopBalls = function() {
+  console.log("FallingBallGroup.stopBalls");
+  ELP.BallGroup.prototype.stopBalls.call(this);
+  this.game.time.events.remove(this.newBallTimer);
+};
+
+/**
+ * Override parent to approximate the size of ball group
+ */
+ELP.FallingBallGroup.prototype.getTotalGroupBallCount = function() {
+  console.log("FallingBallGroup.getTotalGroupBallCount");
+  //Figure out how big to make the ball group (approx)
+  var worldHeight = this.game.world.height;
+  var expectedTravelTime = Math.ceil(worldHeight/this.settings.ballVelocity);
+  return (2*(Math.ceil(expectedTravelTime * this.settings.ballFrequency)));
+};
+
+/**
+ * Private.  Adds a ball to the game world
+ */
+ELP.FallingBallGroup.prototype.emittBall = function() {
+  console.log("FallingBallGroup Emitting ball");
+  var ball = this.getFirstDead();
+  ball.reset(Math.round(Math.random() * this.game.world.width), (-1*ball.height));
+  var yVel = (this.settings.ballVelocity + (this.settings.ballVelocity * (Math.random() * this.settings.ballVelocityRandomness)));
+  ball.body.velocity.setTo(0, yVel);
+
+
+};
+/**
+ * Start dispensing balls
+ */
+ELP.FallingBallGroup.prototype.startBallsFalling = function() {
+  this.newBallTimer = this.game.time.events.loop(
+    Math.round(Phaser.Timer.SECOND/this.settings.ballFrequency),
+    this.emittBall,
+    this);
+};
+
+
+
+//===== ENDOF Falling Ball Group =====
+

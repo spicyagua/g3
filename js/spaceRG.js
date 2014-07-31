@@ -24,10 +24,12 @@ EG3.SpaceRG = function(args) {
     this.tileSprite = this.game.add.tileSprite(0,0,this.game.world.width, this.game.world.height,"spaceBackground");
     this.tileSprite.autoScroll(0,s.skySpeed);
     this.sprite = new this.BlobSprite(this.game, this.settings);
-    this.ballGroup = new this.BallGroup(this.game, this.settings);
-    this.ballGroup.startBalls();
-    this.redBallGroup = new this.RedBallGroup(this.game, this.settings);
-    this.redBallGroup.startBalls();
+    this.ballGroup = new this.FallingBallGroup(this.game, this.settings.greenBallGroupSettings);
+    this.ballGroup.init();
+    this.ballGroup.startBallsFalling();
+    this.redBallGroup = new this.FallingBallGroup(this.game, this.settings.redBallGroupSettings);
+    this.redBallGroup.init();
+    this.redBallGroup.startBallsFalling();
     this.game.input.onTap.add(this.tapHandler);
     this.countownClock = this.createCountDownTimer(this.settings.totalTime);
     this.firstUpdate = true;
@@ -40,9 +42,9 @@ EG3.SpaceRG = function(args) {
   this.reset = function() {
     this.sprite.resetPlayer();
     this.ballGroup.resetBalls();
-    this.ballGroup.startBalls();
+    this.ballGroup.startBallsFalling();
     this.redBallGroup.resetBalls();
-    this.redBallGroup.startBalls();
+    this.redBallGroup.startBallsFalling();
     this.game.input.onTap.add(this.tapHandler);
     this.tileSprite.autoScroll(0,this.settings.skySpeed);
     this.countownClock.reset(this.settings.totalTime);
@@ -134,180 +136,6 @@ EG3.SpaceRG = function(args) {
   //=============================================================
   //  Extended Types
   //=============================================================
-
-
-  // ===== BEGIN Ball Group =====
-
-  /**
-   * Constructor.  Reads several settings to configure the group
-   */
-  this.BallGroup = function(game, settings) {
-
-    //Call Group's constructor
-    Phaser.Group.call(this, game);
-
-    //Add to game
-    this.game.add.existing(this);
-
-    this.settings = settings;
-
-    //Figure out how big to make the ball group (approx)
-    var worldHeight = this.game.world.height;
-    var expectedTravelTime = Math.ceil(worldHeight/settings.ballVelocity);
-    var expectedBalls = 2*(Math.ceil(expectedTravelTime * settings.ballFrequency));
-
-    //Convienence so all balls will have physics enabled
-    this.physicsBodyType = Phaser.Physics.ARCADE;
-    this.enableBody = true;
-
-    console.log("Creating: " + expectedBalls + " balls");
-    for(var i = 0; i<expectedBalls; i++) {
-      var s = this.create(-100,-100, "greenBall");
-      s.name = "greenBall" + i;
-      s.checkWorldBounds = true;
-      s.outOfBoundsKill = true;
-      s.kill();
-      s.body.velocity.setTo(0,0);
-
-    }
-
-    //For the timer
-    this.newBallTimer = {};//I know I don't need to "declare" this...
-
-  };
-  this.BallGroup.prototype = Object.create(Phaser.Group.prototype);
-  this.BallGroup.prototype.constructor = this.BallGroup;
-
-  /**
-   * Private.  Adds a ball to the game world
-   */
-  this.BallGroup.prototype._addBall = function() {
-    console.log("Adding ball");
-    var ball = this.getFirstDead();
-    ball.reset(Math.round(Math.random() * this.game.world.width), (-1*ball.height));
-    var yVel = (this.settings.ballVelocity + (this.settings.ballVelocity * (Math.random() * this.settings.ballVelocityRandomness)));
-    ball.body.velocity.setTo(0, yVel);
-
-
-  };
-  /**
-   * Start dispensing balls
-   */
-  this.BallGroup.prototype.startBalls = function() {
-    this.newBallTimer = this.game.time.events.loop(
-      Math.round(Phaser.Timer.SECOND/this.settings.ballFrequency),
-      this._addBall,
-      this);
-  };
-
-  /**
-   * Stop dispensing balls
-   */
-  this.BallGroup.prototype.stopBalls = function() {
-    this.game.time.events.remove(this.newBallTimer);
-    this.forEach(function(ball) {
-      ball.body.velocity.setTo(0,0);
-    }, this);
-  };
-
-  /**
-   * Go back to as-created state (before first "startBalls" call).
-   */
-  this.BallGroup.prototype.resetBalls = function() {
-    this.forEach(function(ball) {
-      ball.kill();
-    }, this);
-  };
-
-  //===== ENDOF Ball Group =====
-
-
-  // ===== BEGIN RedBall Group =====
-
-  /**
-   * Constructor.  Reads several settings to configure the group
-   */
-  this.RedBallGroup = function(game, settings) {
-
-    //Call Group's constructor
-    Phaser.Group.call(this, game);
-
-    //Add to game
-    this.game.add.existing(this);
-
-    this.settings = settings;
-
-    //Figure out how big to make the ball group (approx)
-    var worldHeight = this.game.world.height;
-    var expectedTravelTime = Math.ceil(worldHeight/settings.redBallVelocity);
-    var expectedBalls = 2*(Math.ceil(expectedTravelTime * settings.redBallFrequency));
-
-    //Convienence so all balls will have physics enabled
-    this.physicsBodyType = Phaser.Physics.ARCADE;
-    this.enableBody = true;
-
-    console.log("Creating: " + expectedBalls + " balls");
-    for(var i = 0; i<expectedBalls; i++) {
-      var s = this.create(-100,-100, "redBall");
-      s.name = "redBall" + i;
-      s.checkWorldBounds = true;
-      s.outOfBoundsKill = true;
-      s.kill();
-      s.body.velocity.setTo(0,0);
-
-    }
-
-    //For the timer
-    this.newBallTimer = {};//I know I don't need to "declare" this...
-
-  };
-  this.RedBallGroup.prototype = Object.create(Phaser.Group.prototype);
-  this.RedBallGroup.prototype.constructor = this.RedBallGroup;
-
-  /**
-   * Private.  Adds a ball to the game world
-   */
-  this.RedBallGroup.prototype._addBall = function() {
-    console.log("Adding red ball");
-    var ball = this.getFirstDead();
-    ball.reset(Math.round(Math.random() * this.game.world.width), (-1*ball.height));
-    var yVel = (this.settings.redBallVelocity + (this.settings.redBallVelocity * (Math.random() * this.settings.redBallVelocityRandomness)));
-    ball.body.velocity.setTo(0, yVel);
-
-
-  };
-  /**
-   * Start dispensing balls
-   */
-  this.RedBallGroup.prototype.startBalls = function() {
-    this.newBallTimer = this.game.time.events.loop(
-      Math.round(Phaser.Timer.SECOND/this.settings.redBallFrequency),
-      this._addBall,
-      this);
-  };
-
-  /**
-   * Stop dispensing balls
-   */
-  this.RedBallGroup.prototype.stopBalls = function() {
-    this.game.time.events.remove(this.newBallTimer);
-    this.forEach(function(ball) {
-      ball.body.velocity.setTo(0,0);
-    }, this);
-  };
-
-  /**
-   * Go back to as-created state (before first "startBalls" call).
-   */
-  this.RedBallGroup.prototype.resetBalls = function() {
-    this.forEach(function(ball) {
-      ball.kill();
-    }, this);
-  };
-
-  //===== ENDOF Red Ball Group =====
-
-
 
 
   //===== BEGIN Blob Sprite =====
