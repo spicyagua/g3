@@ -95,7 +95,7 @@ EG3.BouncyBalls = function(args) {
     this.game.physics.arcade.collide(this.greenBallGroup);
     this.game.physics.arcade.collide(this.sprite,
       this.greenBallGroup,
-      null,//this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
+      null,
       this.playerBallCollisionProcess,
       this);
   };

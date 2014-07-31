@@ -285,121 +285,6 @@ EG3.Level.prototype = {
 
 
   /**
-   * Still haven't found a good way to
-   * use phaser and OO instincts, but this is a start
-   */
-  createPlayerWrapper: function() {
-
-    var that = this;
-    var alive = true;
-
-    var playerGroup = this.game.add.group();
-    var playerBody = this.game.add.sprite(
-      (this.game.world.width/2) - 25,
-      (this.game.world.height/2) - 20, 'playerBody');
-    playerBody.anchor.setTo(0.5, 0.5);
-    this.game.physics.enable(playerBody, Phaser.Physics.ARCADE);
-
-
-    //Added so RG works, but may have effects in other levels.
-    playerBody.body.bounce.setTo(0,0);
-    playerBody.immovable = true;
-
-    var deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
-    deadPlayerEye.anchor.setTo(0.5, 0.375);
-    this.game.physics.enable(deadPlayerEye, Phaser.Physics.ARCADE);
-
-    var openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
-    openPlayerEye.anchor.setTo(0.5, 0.375);
-    this.game.physics.enable(openPlayerEye, Phaser.Physics.ARCADE);
-    var currentPlayerEye = openPlayerEye;
-
-    currentPlayerEye.x = playerBody.x;
-    currentPlayerEye.y = playerBody.y;
-    currentPlayerEye.rotation = this.game.physics.arcade.angleToPointer(currentPlayerEye);
-
-    playerGroup.add(playerBody);
-    playerGroup.add(openPlayerEye);
-    playerGroup.add(deadPlayerEye);
-
-    var _revivePlayer = function() {
-
-      playerBody.checkWorldBounds = false;
-      playerBody.body.gravity.y = 0;
-      playerBody.body.velocity.x = 0;
-      playerBody.body.velocity.y = 0;
-
-      //Reset location of eye(s) and body
-      playerBody.x = (that.game.world.width/2) - 25;
-      playerBody.y = (that.game.world.height/2) - 20;
-      deadPlayerEye.x = -100;
-      deadPlayerEye.y = -100;
-
-      openPlayerEye.revive();
-
-      currentPlayerEye = openPlayerEye;;
-
-      currentPlayerEye.x = playerBody.x;
-      currentPlayerEye.y = playerBody.y;
-      currentPlayerEye.rotation = that.game.physics.arcade.angleToPointer(currentPlayerEye);
-
-      alive = true;
-    };
-
-    var _pausePlayer = function() {
-      playerBody.body.gravity.y = 0;
-      playerBody.body.velocity.x = 0;
-      playerBody.body.velocity.y = 0;
-      currentPlayerEye.x = playerBody.x;
-      currentPlayerEye.y = playerBody.y;
-    };
-
-    var _killPlayer = function() {
-      console.log("_killPlayer");
-      //Replace the eye with the 'X'
-      currentPlayerEye.kill();
-      currentPlayerEye = deadPlayerEye;
-
-      currentPlayerEye.x = playerBody.x;
-      currentPlayerEye.y = playerBody.y;
-//      playerBody.body.gravity.y = 300; Re-add for that cool "falling" effect
-      playerBody.body.gravity.y = 0;
-      playerBody.body.velocity.x = 0;
-      playerBody.body.velocity.y = 0;
-
-      playerGroup.bringToTop(currentPlayerEye);
-
-      alive = false;
-    };
-
-    var _hidePlayer = function() {
-      playerBody.kill();
-      openPlayerEye.kill();
-    };
-
-    var _update = function() {
-      //TODO there is some bug where the physics body is already updated, and the eye looks funny
-      //falling.  Not really noticable on regular play, but something to be worked out.
-      currentPlayerEye.x = playerBody.x;
-      currentPlayerEye.y = playerBody.y;
-      if(alive) {
-        currentPlayerEye.rotation = (Math.PI*1.5) + that.game.physics.arcade.angleToPointer(currentPlayerEye);
-    }
-    };
-
-    return {
-      playerBody: playerBody,
-      revivePlayer: _revivePlayer,
-      killPlayer: _killPlayer,
-      update: _update,
-      hidePlayer: _hidePlayer,
-      pausePlayer: _pausePlayer
-    };
-  },
-
-
-
-  /**
    * New idea in "reuse"
    * Gets passed the total time (in millis)
    * For now assumes "seconds"
@@ -580,6 +465,8 @@ ELP.BallGroup.prototype.resetBalls = function() {
 };
 // ===== ENDOF Ball Group =====
 
+
+
 // ===== BEGIN Random Ball Group =====
 
 /**
@@ -634,10 +521,6 @@ ELP.RandomBallGroup.prototype.bttw = function(ball) {
     childCount++;
   }, this);
 };
-
-
-
-
 // ===== ENDOF Random Ball Group =====
 
 
@@ -701,6 +584,9 @@ ELP.FallingBallGroup.prototype.startBallsFalling = function() {
 };
 
 //===== ENDOF Falling Ball Group =====
+
+
+
 
 
 //===== BEGIN Blob Sprite =====
@@ -862,9 +748,10 @@ ELP.BlobSprite.prototype.resetPlayer = function() {
   this.moving = false;
   this.update();
 };
-
-
 //===== ENDOF Blob Sprite =====
+
+
+
 
 //===== BEGIN SlidingBlob Sprite =====
 

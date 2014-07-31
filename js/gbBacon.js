@@ -67,12 +67,12 @@ EG3.GBBacon = function(args) {
     this.game.physics.arcade.collide(this.greenBallGroup);
     this.game.physics.arcade.collide(this.sprite,
       this.greenBallGroup,
-      this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
+      null,
       this.playerBallCollisionProcess,
       this);
     this.game.physics.arcade.collide(this.baconWrapper.baconBody,
       this.sprite,
-      this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
+      null,
       this.playerBaconCollisionProcess,
       this);
   };
