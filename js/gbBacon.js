@@ -24,10 +24,11 @@ EG3.GBBacon = function(args) {
     this.baconWrapper = this.createBaconWrapper(s.baconSpeed);
     this.game.time.events.add(Phaser.Timer.SECOND*s.baconDelay, this.showBacon, this);
 
-    this.playerWrapper = this.createPlayerWrapper();
+    this.sprite = new this.BlobSprite(this.game, this.settings);
+    this.sprite.init();
 
     //Ask prototype to enable tab/follow motion of player
-    this.enableTapFollow(this.playerWrapper.playerBody);
+    this.enableTapFollow(this.sprite);
   };
 
 
@@ -36,14 +37,12 @@ EG3.GBBacon = function(args) {
    */
   this.reset = function() {
 
-    this.playerWrapper.revivePlayer();
+    this.sprite.resetPlayer();
 
     this.greenBallGroup.bttw();
 
-//    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
-
     //re-enable the tap/follow on the sprite
-    this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
+    this.enableTapFollow(this.sprite);
 
     this.baconWrapper.killBacon();
 
@@ -66,17 +65,16 @@ EG3.GBBacon = function(args) {
 //    this.game.debug.body(this.playerEye);
 
     this.game.physics.arcade.collide(this.greenBallGroup);
-    this.game.physics.arcade.collide(this.playerWrapper.playerBody,
+    this.game.physics.arcade.collide(this.sprite,
       this.greenBallGroup,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
     this.game.physics.arcade.collide(this.baconWrapper.baconBody,
-      this.playerWrapper.playerBody,
+      this.sprite,
       this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBaconCollisionProcess,
       this);
-    this.playerWrapper.update();
   };
 
   /**
@@ -85,7 +83,7 @@ EG3.GBBacon = function(args) {
   this.displayFailState = function() {
     this.baconWrapper.pauseBacon();
     this.greenBallGroup.stopBalls();
-    this.playerWrapper.killPlayer();
+    this.sprite.killPlayer();
     this.disableTapFollow();
 
   };
@@ -96,7 +94,7 @@ EG3.GBBacon = function(args) {
   this.displayVictoryState = function() {
     this.baconWrapper.pauseBacon();
     this.greenBallGroup.stopBalls();
-    this.playerWrapper.pausePlayer();
+    this.sprite.stopPlayerMoving();
     this.disableTapFollow();
   };
 
@@ -124,8 +122,8 @@ EG3.GBBacon = function(args) {
   this.showBacon = function() {
     console.log("Show bacon");
     this.baconWrapper.showBacon(
-      this.playerWrapper.playerBody.x,
-      this.playerWrapper.playerBody.y,
+      this.sprite.x,
+      this.sprite.y,
       this.settings.baconFadeMillis);
   };
 };

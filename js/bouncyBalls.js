@@ -19,10 +19,12 @@ EG3.BouncyBalls = function(args) {
     this.greenBallGroup = new this.RandomBallGroup(this.game, this.settings.greenBallGroupSettings);
     this.greenBallGroup.init();
     this.greenBallGroup.bttw();
-    this.playerWrapper = this.createPlayerWrapper();
+
+    this.sprite = new this.BlobSprite(this.game, this.settings);
+    this.sprite.init();
 
     //Ask prototype to enable tab/follow motion of player
-    this.enableTapFollow(this.playerWrapper.playerBody);
+    this.enableTapFollow(this.sprite);
 
     this.countownClock = this.createCountDownTimer(this.settings.totalTime);
   };
@@ -36,14 +38,12 @@ EG3.BouncyBalls = function(args) {
 
     this.firstUpdate = true;
 
-    this.playerWrapper.revivePlayer();
+    this.sprite.resetPlayer();
 
     this.greenBallGroup.bttw();
 
-//    this.playerWrapper.playerBody.events.onOutOfBounds.remove(this.spriteLeftWorld);
-
     //re-enable the tap/follow on the sprite
-    this.enableTapFollow(this.playerWrapper.playerBody, this.settings.playerSpeedFactor);
+    this.enableTapFollow(this.sprite);
 
     this.countownClock.reset(this.settings.totalTime);
 
@@ -63,7 +63,7 @@ EG3.BouncyBalls = function(args) {
   this.displayFailState = function() {
     this.disableTapFollow();
     this.greenBallGroup.stopBalls();
-    this.playerWrapper.killPlayer();
+    this.sprite.killPlayer();
   };
   /**
    * Part of the "level" contract
@@ -71,7 +71,7 @@ EG3.BouncyBalls = function(args) {
   this.displayVictoryState = function() {
     this.disableTapFollow();
     this.greenBallGroup.stopBalls();
-    this.playerWrapper.pausePlayer();
+    this.sprite.stopPlayerMoving();
   };
 
   /**
@@ -93,12 +93,11 @@ EG3.BouncyBalls = function(args) {
 //    this.game.debug.body(this.playerEye);
 
     this.game.physics.arcade.collide(this.greenBallGroup);
-    this.game.physics.arcade.collide(this.playerWrapper.playerBody,
+    this.game.physics.arcade.collide(this.sprite,
       this.greenBallGroup,
       null,//this.uselessFunction,//I have yet to figure out what this does and why it is called, but I need to provide it so I can get the next function
       this.playerBallCollisionProcess,
       this);
-    this.playerWrapper.update();
   };
 
   /**

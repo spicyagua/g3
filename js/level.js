@@ -180,8 +180,7 @@ EG3.Level.prototype = {
   //====================== Optional behaviors ===========================
 
 
-  enableTapFollow: function(bodyToMove, tfSpeed) {
-    this.tfSpeed = tfSpeed;
+  enableTapFollow: function(bodyToMove) {
     this.playerFollowsTap = true;
     this.bodyToFollow = bodyToMove;
     //Tap handler to move the player
@@ -202,136 +201,12 @@ EG3.Level.prototype = {
    * Callback when user taps on screen to move sprite
    */
   tapFollowHandler: function() {
-    console.log("Moving to pointer: " + this.game.input.activePointer.x + ", " + this.game.input.activePointer.y);
-    if(this.moveTween.isRunning) {
-      console.log("Tween running.  Stop it");
-      this.moveTween.stop();
-    }
-    else {
-      console.log("Tween not running.");
-    }
-
-    //Create the tween to move the player
-    this.moveTween = this.game.add.tween(this.bodyToFollow);
-
-    //so the player moves at a constant *speed*, the tween should have
-    //a duration proportional to the distance it will travel
-    var duration = this.tfSpeed *
-      Math.floor(this.game.physics.arcade.distanceToPointer(this.bodyToFollow, this.game.input.activePointer));
-
-    this.moveTween.to(
-      {
-        x: this.game.input.activePointer.x,
-        y: this.game.input.activePointer.y
-      },
-      duration,
-      Phaser.Easing.Quadratic.In
-    );
-    console.log("Calling start on tween");
-    this.moveTween.start();
+    this.bodyToFollow.tweenToXY(this.game.input.activePointer.x, this.game.input.activePointer.y);
   },
 
   //====================== Composite factories ===========================
 
 
-  /**
-   * Creates a group of balls (duh).  Currently, they bounce around but
-   * may make this a parameter at some point
-   *
-   * @param imageName imageName (from cache)
-   * @param numBalls
-   * @param speed (50 is "reasonable")
-   */
-  createBallGroup: function(imageName, numBalls, speed) {
-
-    var that = this;
-
-    var worldWidth = this.game.world.width;
-    var worldHeight = this.game.world.height;
-
-    //Cache the image dimensions.  We'll use them a lot later
-    var img = this.game.cache.getImage(imageName);
-    var _imgWidth = img.width;
-    var _imgHeight = img.height;
-    img = null;
-
-    var _ballGroup = this.game.add.group();
-    _ballGroup.enableBody = true;
-
-    for (var i = 0; i < numBalls; i++) {
-      var s = _ballGroup.create(0,0,imageName);
-      s.name = imageName + i;
-      this.game.physics.enable(s, Phaser.Physics.ARCADE);
-      s.body.collideWorldBounds = true;
-      s.body.bounce.setTo(1, 1);
-      s.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
-
-    }
-
-    /**
-     * Distribute balls along the walls
-     */
-    var _bttw = function() {
-      //Try to distribute the balls along the walls so as to not
-      //begin the game in collision with each other or
-      //the player sprite
-      var ySpace = (that.game.world.height-(_imgHeight*2))/((numBalls-2)/2);
-      var childCount = 0;
-
-      _ballGroup.forEach(function(b) {
-        var leftSide = true;
-        if(childCount*2 >= numBalls) {
-          leftSide = false;
-        }
-        var startx = (leftSide?_imgWidth:(that.game.world.width - _imgWidth));
-        var starty = (leftSide?
-          (childCount*ySpace):
-          ((childCount - ((numBalls)/2))*ySpace)
-          )+_imgWidth;
-        b.x = startx;
-        b.y = starty;
-        b.body.bounce.setTo(0.8, 0.8);
-        b.body.velocity.setTo(10 + Math.random() * speed, 10 + Math.random() * speed);
-        b.body.bounce.x = 1;
-        b.body.bounce.y = 1;
-        childCount++;
-      }, that);
-    };
-
-    var _hideAll = function() {
-      _ballGroup.visible = false;
-    };
-
-    var _fadeIn = function(fadeInMillis) {
-      _ballGroup.alpha = 0
-      _ballGroup.visible = true;
-      this.fade = that.game.add.tween(_ballGroup).to({alpha:1}, fadeInMillis, Phaser.Easing.Linear.NONE, true);
-    };
-
-    var _distributeRandom = function() {
-      _ballGroup.forEach(function(ball) {
-        ball.x = Math.random()*worldWidth;
-        ball.y = Math.random()*worldHeight;
-      }, this);
-    };
-
-    var _stopMotion = function() {
-//      _ballGroup.callAll("body.velocity.setTo", null, 0, 0);
-      _ballGroup.forEach(function(ball) {
-        ball.body.velocity.setTo(0,0);
-      }, this);
-    };
-
-    return {
-      group: _ballGroup,
-      ballsToTheWalls: _bttw,
-      stopMoving: _stopMotion,
-      hideAll: _hideAll,
-      fadeIn: _fadeIn,
-      distributeRandom: _distributeRandom
-    };
-
-  },
 
   createBaconWrapper: function(speed) {
     var that = this;
@@ -602,8 +477,15 @@ EG3.Level.prototype = {
   },
 };
 
+
+//=============================================================
+//  Extended Types
+//=============================================================
+
 //Save some typing
 ELP = EG3.Level.prototype;
+
+// ===== BEGIN Ball Group =====
 
 /**
  * Constructor for base ball group.  Reads several settings to configure the group
@@ -696,7 +578,7 @@ ELP.BallGroup.prototype.resetBalls = function() {
     ball.reset(-1*this.ballDiameter*2, -1*this.ballDiameter*2);
   }, this);
 };
-
+// ===== ENDOF Ball Group =====
 
 // ===== BEGIN Random Ball Group =====
 
@@ -818,7 +700,220 @@ ELP.FallingBallGroup.prototype.startBallsFalling = function() {
     this);
 };
 
-
-
 //===== ENDOF Falling Ball Group =====
+
+
+//===== BEGIN Blob Sprite =====
+
+/**
+ * Constructor
+ */
+ELP.BlobSprite = function(game, settings) {
+  //Call Sprite's constructor
+  Phaser.Sprite.call(this, game, 0, 0, "playerBody");
+
+  this.settings = settings;
+  console.log("BlobSprite.constructor");
+
+};
+
+ELP.BlobSprite.prototype = Object.create(Phaser.Sprite.prototype);
+ELP.BlobSprite.prototype.constructor = ELP.BlobSprite;
+
+/**
+ * Sourogate constructor.  I think I had call ordering issues
+ * before so I'm using a Java trick.  Perhaps not required?
+ */
+ELP.BlobSprite.prototype.init = function() {
+  console.log("BlobSprite.init()");
+  this.playerGroup = this.game.add.group();
+  this.anchor.setTo(0.5, 0.5);
+  this.game.physics.enable(this, Phaser.Physics.ARCADE);
+  this.game.add.existing(this);
+
+  var startingPoint = this.getStartingPoint();
+  this.x = startingPoint.x;
+  this.y = startingPoint.y;
+
+  this.deadPlayerEye = this.game.add.sprite(-100, -100, 'deadEye');
+  this.deadPlayerEye.anchor.setTo(0.5, 0.375);
+  this.game.physics.enable(this.deadPlayerEye, Phaser.Physics.ARCADE);
+
+  this.openPlayerEye = this.game.add.sprite(0, 0, 'playerEye');
+  this.openPlayerEye.anchor.setTo(0.5, 0.375);
+  this.game.physics.enable(this.openPlayerEye, Phaser.Physics.ARCADE);
+  this.currentPlayerEye = this.openPlayerEye;
+
+  this.playerGroup.add(this);
+  this.playerGroup.add(this.openPlayerEye);
+  this.playerGroup.add(this.deadPlayerEye);
+  this.playerGroup.bringToTop(this.openPlayerEye);
+};
+
+/**
+ * Get the position for the sprite to start at game start
+ * and after reset.  May be overidden.
+ *
+ * Default is center x/y
+ */
+ELP.BlobSprite.prototype.getStartingPoint = function() {
+  console.log("BlobSprite.getStartingPoint()");
+  return {
+    x: (this.game.world.width/2) - (this.width/2),
+    y: (this.game.world.height/2) - (this.height/2)
+  };
+};
+
+/**
+ * Note that update is automagically called by Phaser
+ */
+ELP.BlobSprite.prototype.update = function() {
+  //Position the *body* this may be ahead (coordinate-wise) from the
+  //display of the sprite
+  this.currentPlayerEye.body.x = this.body.x;
+  this.currentPlayerEye.body.y = this.body.y;
+
+  this.currentPlayerEye.rotation = (Math.PI*1.5) + this.game.physics.arcade.angleToPointer(this.currentPlayerEye);
+};
+
+
+//Defensive programming around common names
+if(ELP.BlobSprite.prototype.tweenToXY) {throw "tweenToXY already defined.  Name conflict with new Phaser";}
+
+/**
+ * Move to the given XY coordinate (then stop).
+ */
+ELP.BlobSprite.prototype.tweenToXY = function(x, y) {
+  console.log("BlobSprite.tweenToXY.  Moving to point: " + x + ", " + y);
+  if(this.moveTween && this.moveTween.isRunning) {
+    console.log("Tween running.  Stop it");
+    this.moveTween.stop();
+  }
+  else {
+    console.log("Tween not running.");
+  }
+
+  //Create the tween
+  this.moveTween = this.game.add.tween(this);
+
+  //so the player moves at a constant *speed*, the tween should have
+  //a duration proportional to the distance it will travel
+  var duration = this.settings.playerSpeedFactor *
+    Math.floor(this.game.physics.arcade.distanceToXY(this, x, y));
+
+  this.moveTween.to(
+    {
+      x: x,
+      y: y
+    },
+    duration,
+    Phaser.Easing.Quadratic.In
+  );
+  console.log("Calling start on tween");
+  this.moveTween.start();
+
+};
+
+/**
+ * Stop the damm thing from moving
+ */
+ELP.BlobSprite.prototype.stopPlayerMoving = function() {
+  console.log("BlobSprite.stopPlayerMoving");
+  if(this.moveTween && this.moveTween.isRunning) {
+    this.moveTween.stop();
+  }
+  this.body.acceleration.x =
+  this.body.acceleration.y =
+  this.body.velocity.x =
+  this.body.velocity.y = 0;
+};
+
+/**
+ * Puts the display into mode where the player has the dead-eye
+ */
+ELP.BlobSprite.prototype.killPlayer = function() {
+  console.log("BlobSprite.killPlayer");
+  this.stopPlayerMoving();
+  this.currentPlayerEye.kill();
+  this.currentPlayerEye = this.deadPlayerEye;
+
+  this.currentPlayerEye.body.x = this.body.x;
+  this.currentPlayerEye.body.y = this.body.y;
+  this.playerGroup.bringToTop(this.currentPlayerEye);
+};
+
+/**
+ * Reset the player back to as-created form
+ */
+ELP.BlobSprite.prototype.resetPlayer = function() {
+  console.log("BlobSprite.resetPlayer");
+  this.stopPlayerMoving();
+
+  var startingPoint = this.getStartingPoint();
+  this.x = startingPoint.x
+  this.y = startingPoint.y
+
+  this.deadPlayerEye.x = -100;
+  this.deadPlayerEye.y = -100;
+
+  this.openPlayerEye.revive();
+  this.currentPlayerEye = this.openPlayerEye;;
+
+  this.moving = false;
+  this.update();
+};
+
+
+//===== ENDOF Blob Sprite =====
+
+//===== BEGIN SlidingBlob Sprite =====
+
+ELP.SlidingBlobSprite = function(game, settings) {
+  //Call Group's constructor
+  ELP.BlobSprite.call(this, game, settings);
+
+  console.log("SlidingBlobSprite constructor");
+};
+
+ELP.SlidingBlobSprite.prototype = Object.create(ELP.BlobSprite.prototype);
+ELP.SlidingBlobSprite.prototype.constructor = ELP.SlidingBlobSprite;
+
+ELP.SlidingBlobSprite.prototype.getStartingPoint = function() {
+  console.log("SlidingBlobSprite.getStartingPoint");
+  return {
+    x: Math.round((this.game.world.width/2) + (this.width/2)),
+    y: this.game.world.height - this.height - (Math.round(this.height/2))
+  };
+};
+//Defensive programming around common names
+if(ELP.SlidingBlobSprite.prototype.slideToX) {throw "slidetoXY already defined.  Name conflict with new Phaser";}
+/**
+ * Slide the blob along a fixed line
+ */
+ELP.SlidingBlobSprite.prototype.slideToX = function(x) {
+  console.log("SlidingBlobSprite.slideToX");
+  this.tweenToXY(x, this.y);
+
+};
+
+
+
+//===== ENDOF SlidingBlob Sprite =====
+
+
+
+//===== BEGIN XYBlob Sprite =====
+/*
+ELP.XYBlob = function(game, settings) {
+  //Call Group's constructor
+  ELP.BlobSprite.call(this, game, settings);
+
+  console.log("XYBlob constructor");
+};
+
+ELP.XYBlob.prototype = Object.create(ELP.BlobSprite.prototype);
+ELP.XYBlob.prototype.constructor = ELP.XYBlob;
+*/
+//===== ENDOF XYBlob Sprite =====
+
 
